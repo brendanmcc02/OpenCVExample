@@ -1,9 +1,9 @@
-﻿#include "Utilities.h"
+#include "Utilities.h"
 
 void MyApplication(VideoCapture& roadVideo) {
 	if (roadVideo.isOpened()) {
 		// image variables
-		Mat currentFrameOriginal, currentFrameGray, manualOutput, otsuImageBinary, otsuOutput;
+		Mat currentFrameOriginal, currentFrameGray, manualOutput, otsuImageBinary, otsuOutput, adaptiveOutput;
 
 		// constants
 		const int numberOfFrames = roadVideo.get(CAP_PROP_FRAME_COUNT);
@@ -11,7 +11,7 @@ void MyApplication(VideoCapture& roadVideo) {
 		const int thresholdValue = 100;
 
 		while (cv::waitKey(50) != 'q') {
-			// move to next frame
+			// move to next frame	
 			roadVideo >> currentFrameOriginal;
 
 			// loop video
@@ -20,13 +20,14 @@ void MyApplication(VideoCapture& roadVideo) {
 				continue; // skip to next iteration
 			}
 
-			// otsu thresholding
+			// convert current frame to grayscale
 			cvtColor(currentFrameOriginal, currentFrameGray, COLOR_BGR2GRAY);
+
+			// otsu thresholding
 			threshold(currentFrameGray, otsuImageBinary, thresholdValue, maxThreshold, THRESH_BINARY | THRESH_OTSU);
 			cvtColor(otsuImageBinary, otsuOutput, COLOR_GRAY2BGR);
 
 			// manual thresholding
-			cvtColor(currentFrameOriginal, currentFrameGray, COLOR_BGR2GRAY);
 			threshold(currentFrameGray, manualOutput, thresholdValue, maxThreshold, THRESH_BINARY);
 
 			// display videos
