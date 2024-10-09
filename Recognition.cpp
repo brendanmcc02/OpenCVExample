@@ -326,7 +326,7 @@ void PCAFaceRecognition() {
 	{
 		for (int image_number = 1; image_number<=NUMBER_OF_IMAGES_PER_FACE; image_number++)
 		{
-			sprintf(file_name,"Media/att_faces/s%d/%d.pgm",face_number,image_number);
+			sprintf(file_name,"media/att_faces/s%d/%d.pgm",face_number,image_number);
 			Mat current_image = imread(file_name,0);
 			if (image_number>1)
 			{

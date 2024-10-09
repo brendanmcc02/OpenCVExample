@@ -97,7 +97,7 @@ int liveVideo()
 int main(int argc, const char** argv)
 {
 //	liveVideo();
-	char* file_location = "/home/brendanmcc02/Desktop/semester-1/computer-vision/assignments/OpenCVExample/Media/";
+	char* file_location = "/home/brendanmcc02/Desktop/semester-1/computer-vision/assignments/OpenCVExample/media/";
 	char* image_files[] = {
 		"TrinityRegentHouse.jpg",
 		"TrinityCampanile1.jpg",

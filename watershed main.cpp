@@ -92,7 +92,7 @@ int watershed_main(int argc, char** argv)
 		return 0;
 	}
 	string filename = parser.get<string>("@input");
-	Mat img0 = imread("Media/CoatHanger.jpg", 1), imgGray;
+	Mat img0 = imread("media/CoatHanger.jpg", 1), imgGray;
 
 	if (img0.empty())
 	{
