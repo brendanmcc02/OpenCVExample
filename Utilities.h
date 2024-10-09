@@ -93,7 +93,7 @@ Mat convert_32bit_image_for_display(Mat& passed_image, double zero_maps_to=0.0, 
 void show_32bit_image( char* window_name, Mat& passed_image, double zero_maps_to=0.0, double passed_scale_factor=-1.0 );
 Mat ComputeDefaultImage( Mat& passed_image );
 void DrawHistogram( MatND histograms[], int number_of_histograms, Mat& display_image );
-void MyApplication(VideoCapture& roadVideo);
+void MyApplication();
 
 double DistanceBetweenPoints(Point2d point1, Point2d point2);
 double DistanceBetweenPoints(Point2i point1, Point2i point2);

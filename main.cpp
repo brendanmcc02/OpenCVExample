@@ -36,12 +36,23 @@
 #define GOOD_ORINGS_IMAGE_INDEX 26
 #define BAD_ORINGS_IMAGE_INDEX 27
 #define UNKNOWN_ORINGS_IMAGE_INDEX 28
+// intentional +1 difference
+#define PC_10_IMAGE_INDEX 30
+#define PC_11_IMAGE_INDEX 31
+#define PC_12_IMAGE_INDEX 32
+#define PC_13_IMAGE_INDEX 33
+#define PC_14_IMAGE_INDEX 34
+#define PC_15_IMAGE_INDEX 35
+#define PC_16_IMAGE_INDEX 36
+#define PC_17_IMAGE_INDEX 37
+#define PC_18_IMAGE_INDEX 38
+#define PC_19_IMAGE_INDEX 39
+#define PC_20_IMAGE_INDEX 40
 
 #define SURVEILLANCE_VIDEO_INDEX 0
 #define BICYCLES_VIDEO_INDEX 1
 #define ABANDONMENT_VIDEO_INDEX 2
 #define ROAD_VIDEO_INDEX 3
-//#define DRAUGHTS_VIDEO_INDEX 3 not in use, commented out for now
 
 #define HAAR_FACE_CASCADE_INDEX 0
 
@@ -94,10 +105,9 @@ int liveVideo()
 	return 0;
 }
 
-int main(int argc, const char** argv)
-{
-//	liveVideo();
-	char* file_location = "/home/brendanmcc02/Desktop/semester-1/computer-vision/assignments/OpenCVExample/media/";
+int main(int argc, const char** argv) {
+	// liveVideo();
+	char* file_location = "../media/";
 	char* image_files[] = {
 		"TrinityRegentHouse.jpg",
 		"TrinityCampanile1.jpg",
@@ -127,7 +137,7 @@ int main(int argc, const char** argv)
 		"Numbers.jpg",
 		"GoodORings.jpg",
 		"BadORings.jpg",
-		"UnknownORings.jpg"		
+		"UnknownORings.jpg"
     };
 
 	// Load images

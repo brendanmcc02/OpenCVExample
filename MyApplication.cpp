@@ -17,15 +17,18 @@ int pedestrian_crossing_ground_truth[][9] = {
 };
 
 void MyApplication() {
-	for (int image_index = 10; (image_index <= 19); image_index++)
-	{
+	for (int image_index = 10; image_index <= 19; image_index++) {
+		char* file_location = "../media/";
 		char filename[200];
-		sprintf(filename, "media/PC%d.jpg", image_index);
-		Mat original_image;
-		original_image = imread(filename, -1);
+		sprintf(filename, "PC%d.jpg", image_index);
+		string file(file_location);
+		file.append(filename);
 
+		Mat original_image;
+		original_image = imread(file, -1);
 		imshow(filename, original_image);
-		char cha = cv::waitKey();
+		char c = cv::waitKey();
+
 		cv::destroyAllWindows();
 	}
 }
