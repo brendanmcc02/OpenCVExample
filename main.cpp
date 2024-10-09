@@ -282,7 +282,7 @@ int main(int argc, const char** argv)
 			}
 			break;
 		case 'm':
-			MyApplication(video[ROAD_VIDEO_INDEX]);
+			MyApplication();
 			break;
 		default:
 			break;
