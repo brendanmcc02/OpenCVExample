@@ -1,4 +1,4 @@
-# Install script for directory: /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample
+# Install script for directory: /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample
 
 # Set the install prefix
 if(NOT DEFINED CMAKE_INSTALL_PREFIX)
@@ -50,5 +50,5 @@ endif()
 
 string(REPLACE ";" "\n" CMAKE_INSTALL_MANIFEST_CONTENT
        "${CMAKE_INSTALL_MANIFEST_FILES}")
-file(WRITE "/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/${CMAKE_INSTALL_MANIFEST}"
+file(WRITE "/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/${CMAKE_INSTALL_MANIFEST}"
      "${CMAKE_INSTALL_MANIFEST_CONTENT}")

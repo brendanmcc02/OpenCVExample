@@ -53,10 +53,10 @@ RM = /usr/bin/cmake -E rm -f
 EQUALS = =
 
 # The top-level source directory on which CMake was run.
-CMAKE_SOURCE_DIR = /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample
+CMAKE_SOURCE_DIR = /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample
 
 # The top-level build directory on which CMake was run.
-CMAKE_BINARY_DIR = /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build
+CMAKE_BINARY_DIR = /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build
 
 # Include any dependencies generated for this target.
 include CMakeFiles/exec.dir/depend.make
@@ -72,198 +72,198 @@ include CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Binary.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Binary.cpp.o: ../Binary.cpp
 CMakeFiles/exec.dir/Binary.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/exec.dir/Binary.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Binary.cpp.o -MF CMakeFiles/exec.dir/Binary.cpp.o.d -o CMakeFiles/exec.dir/Binary.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Binary.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/exec.dir/Binary.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Binary.cpp.o -MF CMakeFiles/exec.dir/Binary.cpp.o.d -o CMakeFiles/exec.dir/Binary.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Binary.cpp
 
 CMakeFiles/exec.dir/Binary.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Binary.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Binary.cpp > CMakeFiles/exec.dir/Binary.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Binary.cpp > CMakeFiles/exec.dir/Binary.cpp.i
 
 CMakeFiles/exec.dir/Binary.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Binary.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Binary.cpp -o CMakeFiles/exec.dir/Binary.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Binary.cpp -o CMakeFiles/exec.dir/Binary.cpp.s
 
 CMakeFiles/exec.dir/CameraCalibration.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/CameraCalibration.cpp.o: ../CameraCalibration.cpp
 CMakeFiles/exec.dir/CameraCalibration.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/exec.dir/CameraCalibration.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/CameraCalibration.cpp.o -MF CMakeFiles/exec.dir/CameraCalibration.cpp.o.d -o CMakeFiles/exec.dir/CameraCalibration.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/CameraCalibration.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_2) "Building CXX object CMakeFiles/exec.dir/CameraCalibration.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/CameraCalibration.cpp.o -MF CMakeFiles/exec.dir/CameraCalibration.cpp.o.d -o CMakeFiles/exec.dir/CameraCalibration.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/CameraCalibration.cpp
 
 CMakeFiles/exec.dir/CameraCalibration.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/CameraCalibration.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/CameraCalibration.cpp > CMakeFiles/exec.dir/CameraCalibration.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/CameraCalibration.cpp > CMakeFiles/exec.dir/CameraCalibration.cpp.i
 
 CMakeFiles/exec.dir/CameraCalibration.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/CameraCalibration.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/CameraCalibration.cpp -o CMakeFiles/exec.dir/CameraCalibration.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/CameraCalibration.cpp -o CMakeFiles/exec.dir/CameraCalibration.cpp.s
 
 CMakeFiles/exec.dir/Edges.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Edges.cpp.o: ../Edges.cpp
 CMakeFiles/exec.dir/Edges.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/exec.dir/Edges.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Edges.cpp.o -MF CMakeFiles/exec.dir/Edges.cpp.o.d -o CMakeFiles/exec.dir/Edges.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Edges.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_3) "Building CXX object CMakeFiles/exec.dir/Edges.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Edges.cpp.o -MF CMakeFiles/exec.dir/Edges.cpp.o.d -o CMakeFiles/exec.dir/Edges.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Edges.cpp
 
 CMakeFiles/exec.dir/Edges.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Edges.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Edges.cpp > CMakeFiles/exec.dir/Edges.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Edges.cpp > CMakeFiles/exec.dir/Edges.cpp.i
 
 CMakeFiles/exec.dir/Edges.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Edges.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Edges.cpp -o CMakeFiles/exec.dir/Edges.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Edges.cpp -o CMakeFiles/exec.dir/Edges.cpp.s
 
 CMakeFiles/exec.dir/Features.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Features.cpp.o: ../Features.cpp
 CMakeFiles/exec.dir/Features.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/exec.dir/Features.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Features.cpp.o -MF CMakeFiles/exec.dir/Features.cpp.o.d -o CMakeFiles/exec.dir/Features.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Features.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_4) "Building CXX object CMakeFiles/exec.dir/Features.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Features.cpp.o -MF CMakeFiles/exec.dir/Features.cpp.o.d -o CMakeFiles/exec.dir/Features.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Features.cpp
 
 CMakeFiles/exec.dir/Features.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Features.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Features.cpp > CMakeFiles/exec.dir/Features.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Features.cpp > CMakeFiles/exec.dir/Features.cpp.i
 
 CMakeFiles/exec.dir/Features.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Features.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Features.cpp -o CMakeFiles/exec.dir/Features.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Features.cpp -o CMakeFiles/exec.dir/Features.cpp.s
 
 CMakeFiles/exec.dir/Geometric.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Geometric.cpp.o: ../Geometric.cpp
 CMakeFiles/exec.dir/Geometric.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/exec.dir/Geometric.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Geometric.cpp.o -MF CMakeFiles/exec.dir/Geometric.cpp.o.d -o CMakeFiles/exec.dir/Geometric.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Geometric.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/exec.dir/Geometric.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Geometric.cpp.o -MF CMakeFiles/exec.dir/Geometric.cpp.o.d -o CMakeFiles/exec.dir/Geometric.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Geometric.cpp
 
 CMakeFiles/exec.dir/Geometric.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Geometric.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Geometric.cpp > CMakeFiles/exec.dir/Geometric.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Geometric.cpp > CMakeFiles/exec.dir/Geometric.cpp.i
 
 CMakeFiles/exec.dir/Geometric.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Geometric.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Geometric.cpp -o CMakeFiles/exec.dir/Geometric.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Geometric.cpp -o CMakeFiles/exec.dir/Geometric.cpp.s
 
 CMakeFiles/exec.dir/Histograms.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Histograms.cpp.o: ../Histograms.cpp
 CMakeFiles/exec.dir/Histograms.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/exec.dir/Histograms.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Histograms.cpp.o -MF CMakeFiles/exec.dir/Histograms.cpp.o.d -o CMakeFiles/exec.dir/Histograms.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Histograms.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/exec.dir/Histograms.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Histograms.cpp.o -MF CMakeFiles/exec.dir/Histograms.cpp.o.d -o CMakeFiles/exec.dir/Histograms.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Histograms.cpp
 
 CMakeFiles/exec.dir/Histograms.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Histograms.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Histograms.cpp > CMakeFiles/exec.dir/Histograms.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Histograms.cpp > CMakeFiles/exec.dir/Histograms.cpp.i
 
 CMakeFiles/exec.dir/Histograms.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Histograms.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Histograms.cpp -o CMakeFiles/exec.dir/Histograms.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Histograms.cpp -o CMakeFiles/exec.dir/Histograms.cpp.s
 
 CMakeFiles/exec.dir/Images.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Images.cpp.o: ../Images.cpp
 CMakeFiles/exec.dir/Images.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/exec.dir/Images.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Images.cpp.o -MF CMakeFiles/exec.dir/Images.cpp.o.d -o CMakeFiles/exec.dir/Images.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Images.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Building CXX object CMakeFiles/exec.dir/Images.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Images.cpp.o -MF CMakeFiles/exec.dir/Images.cpp.o.d -o CMakeFiles/exec.dir/Images.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Images.cpp
 
 CMakeFiles/exec.dir/Images.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Images.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Images.cpp > CMakeFiles/exec.dir/Images.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Images.cpp > CMakeFiles/exec.dir/Images.cpp.i
 
 CMakeFiles/exec.dir/Images.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Images.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Images.cpp -o CMakeFiles/exec.dir/Images.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Images.cpp -o CMakeFiles/exec.dir/Images.cpp.s
 
 CMakeFiles/exec.dir/MyApplication.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/MyApplication.cpp.o: ../MyApplication.cpp
 CMakeFiles/exec.dir/MyApplication.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/exec.dir/MyApplication.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/MyApplication.cpp.o -MF CMakeFiles/exec.dir/MyApplication.cpp.o.d -o CMakeFiles/exec.dir/MyApplication.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/MyApplication.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_8) "Building CXX object CMakeFiles/exec.dir/MyApplication.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/MyApplication.cpp.o -MF CMakeFiles/exec.dir/MyApplication.cpp.o.d -o CMakeFiles/exec.dir/MyApplication.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/MyApplication.cpp
 
 CMakeFiles/exec.dir/MyApplication.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/MyApplication.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/MyApplication.cpp > CMakeFiles/exec.dir/MyApplication.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/MyApplication.cpp > CMakeFiles/exec.dir/MyApplication.cpp.i
 
 CMakeFiles/exec.dir/MyApplication.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/MyApplication.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/MyApplication.cpp -o CMakeFiles/exec.dir/MyApplication.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/MyApplication.cpp -o CMakeFiles/exec.dir/MyApplication.cpp.s
 
 CMakeFiles/exec.dir/Recognition.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Recognition.cpp.o: ../Recognition.cpp
 CMakeFiles/exec.dir/Recognition.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/exec.dir/Recognition.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Recognition.cpp.o -MF CMakeFiles/exec.dir/Recognition.cpp.o.d -o CMakeFiles/exec.dir/Recognition.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Recognition.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_9) "Building CXX object CMakeFiles/exec.dir/Recognition.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Recognition.cpp.o -MF CMakeFiles/exec.dir/Recognition.cpp.o.d -o CMakeFiles/exec.dir/Recognition.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Recognition.cpp
 
 CMakeFiles/exec.dir/Recognition.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Recognition.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Recognition.cpp > CMakeFiles/exec.dir/Recognition.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Recognition.cpp > CMakeFiles/exec.dir/Recognition.cpp.i
 
 CMakeFiles/exec.dir/Recognition.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Recognition.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Recognition.cpp -o CMakeFiles/exec.dir/Recognition.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Recognition.cpp -o CMakeFiles/exec.dir/Recognition.cpp.s
 
 CMakeFiles/exec.dir/Region.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Region.cpp.o: ../Region.cpp
 CMakeFiles/exec.dir/Region.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/exec.dir/Region.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Region.cpp.o -MF CMakeFiles/exec.dir/Region.cpp.o.d -o CMakeFiles/exec.dir/Region.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Region.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_10) "Building CXX object CMakeFiles/exec.dir/Region.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Region.cpp.o -MF CMakeFiles/exec.dir/Region.cpp.o.d -o CMakeFiles/exec.dir/Region.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Region.cpp
 
 CMakeFiles/exec.dir/Region.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Region.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Region.cpp > CMakeFiles/exec.dir/Region.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Region.cpp > CMakeFiles/exec.dir/Region.cpp.i
 
 CMakeFiles/exec.dir/Region.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Region.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Region.cpp -o CMakeFiles/exec.dir/Region.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Region.cpp -o CMakeFiles/exec.dir/Region.cpp.s
 
 CMakeFiles/exec.dir/Utilities.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Utilities.cpp.o: ../Utilities.cpp
 CMakeFiles/exec.dir/Utilities.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/exec.dir/Utilities.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Utilities.cpp.o -MF CMakeFiles/exec.dir/Utilities.cpp.o.d -o CMakeFiles/exec.dir/Utilities.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Utilities.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_11) "Building CXX object CMakeFiles/exec.dir/Utilities.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Utilities.cpp.o -MF CMakeFiles/exec.dir/Utilities.cpp.o.d -o CMakeFiles/exec.dir/Utilities.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Utilities.cpp
 
 CMakeFiles/exec.dir/Utilities.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Utilities.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Utilities.cpp > CMakeFiles/exec.dir/Utilities.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Utilities.cpp > CMakeFiles/exec.dir/Utilities.cpp.i
 
 CMakeFiles/exec.dir/Utilities.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Utilities.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Utilities.cpp -o CMakeFiles/exec.dir/Utilities.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Utilities.cpp -o CMakeFiles/exec.dir/Utilities.cpp.s
 
 CMakeFiles/exec.dir/Video.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/Video.cpp.o: ../Video.cpp
 CMakeFiles/exec.dir/Video.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/exec.dir/Video.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Video.cpp.o -MF CMakeFiles/exec.dir/Video.cpp.o.d -o CMakeFiles/exec.dir/Video.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Video.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_12) "Building CXX object CMakeFiles/exec.dir/Video.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/Video.cpp.o -MF CMakeFiles/exec.dir/Video.cpp.o.d -o CMakeFiles/exec.dir/Video.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Video.cpp
 
 CMakeFiles/exec.dir/Video.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/Video.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Video.cpp > CMakeFiles/exec.dir/Video.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Video.cpp > CMakeFiles/exec.dir/Video.cpp.i
 
 CMakeFiles/exec.dir/Video.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/Video.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/Video.cpp -o CMakeFiles/exec.dir/Video.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/Video.cpp -o CMakeFiles/exec.dir/Video.cpp.s
 
 CMakeFiles/exec.dir/main.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/main.cpp.o: ../main.cpp
 CMakeFiles/exec.dir/main.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/exec.dir/main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/main.cpp.o -MF CMakeFiles/exec.dir/main.cpp.o.d -o CMakeFiles/exec.dir/main.cpp.o -c /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/main.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_13) "Building CXX object CMakeFiles/exec.dir/main.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/main.cpp.o -MF CMakeFiles/exec.dir/main.cpp.o.d -o CMakeFiles/exec.dir/main.cpp.o -c /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/main.cpp
 
 CMakeFiles/exec.dir/main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/main.cpp > CMakeFiles/exec.dir/main.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/main.cpp > CMakeFiles/exec.dir/main.cpp.i
 
 CMakeFiles/exec.dir/main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/main.cpp -o CMakeFiles/exec.dir/main.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/main.cpp -o CMakeFiles/exec.dir/main.cpp.s
 
 CMakeFiles/exec.dir/watershed_main.cpp.o: CMakeFiles/exec.dir/flags.make
 CMakeFiles/exec.dir/watershed_main.cpp.o: ../watershed\ main.cpp
 CMakeFiles/exec.dir/watershed_main.cpp.o: CMakeFiles/exec.dir/compiler_depend.ts
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/exec.dir/watershed_main.cpp.o"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/watershed_main.cpp.o -MF CMakeFiles/exec.dir/watershed_main.cpp.o.d -o CMakeFiles/exec.dir/watershed_main.cpp.o -c "/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/watershed main.cpp"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_14) "Building CXX object CMakeFiles/exec.dir/watershed_main.cpp.o"
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -MD -MT CMakeFiles/exec.dir/watershed_main.cpp.o -MF CMakeFiles/exec.dir/watershed_main.cpp.o.d -o CMakeFiles/exec.dir/watershed_main.cpp.o -c "/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/watershed main.cpp"
 
 CMakeFiles/exec.dir/watershed_main.cpp.i: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/exec.dir/watershed_main.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/watershed main.cpp" > CMakeFiles/exec.dir/watershed_main.cpp.i
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E "/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/watershed main.cpp" > CMakeFiles/exec.dir/watershed_main.cpp.i
 
 CMakeFiles/exec.dir/watershed_main.cpp.s: cmake_force
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/exec.dir/watershed_main.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/watershed main.cpp" -o CMakeFiles/exec.dir/watershed_main.cpp.s
+	/usr/bin/g++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S "/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/watershed main.cpp" -o CMakeFiles/exec.dir/watershed_main.cpp.s
 
 # Object files for target exec
 exec_OBJECTS = \
@@ -316,7 +316,7 @@ exec: /usr/local/lib/libopencv_flann.so.4.10.0
 exec: /usr/local/lib/libopencv_imgproc.so.4.10.0
 exec: /usr/local/lib/libopencv_core.so.4.10.0
 exec: CMakeFiles/exec.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking CXX executable exec"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_15) "Linking CXX executable exec"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/exec.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -328,6 +328,6 @@ CMakeFiles/exec.dir/clean:
 .PHONY : CMakeFiles/exec.dir/clean
 
 CMakeFiles/exec.dir/depend:
-	cd /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build /home/brendanmcc02/Desktop/semester-1/computer-vision/OpenCVExample/build/CMakeFiles/exec.dir/DependInfo.cmake --color=$(COLOR)
+	cd /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build && $(CMAKE_COMMAND) -E cmake_depends "Unix Makefiles" /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build /home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles/exec.dir/DependInfo.cmake --color=$(COLOR)
 .PHONY : CMakeFiles/exec.dir/depend
 
