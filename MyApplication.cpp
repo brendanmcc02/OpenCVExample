@@ -52,8 +52,8 @@ void MyApplication() {
 		vector<Mat> input_planes(3);
 		Mat processed_image = median_images[num_median_iter].clone();
 		vector<Mat> output_planes;
-		split(processed_image,output_planes);
-		split(median_images[num_median_iter], input_planes);
+		// split(processed_image,output_planes);
+		// split(median_images[num_median_iter], input_planes);
 		for (int plane=0; plane < median_images[num_median_iter].channels(); plane++) {
 			Canny(input_planes[plane],output_planes[plane],100,200);
 		}
