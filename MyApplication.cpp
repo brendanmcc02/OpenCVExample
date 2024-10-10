@@ -16,6 +16,21 @@ int pedestrian_crossing_ground_truth[][9] = {
 	{ 18,0,122,503,117,0,169,503,176}
 };
 
+void get_ground_truth(int image_index, Mat original_image) {
+	Mat ground_truth_image = original_image.clone();
+	Point * points = new Point[4];
+	
+	for (int i = 1; i < 5; i++) {
+		points[i-1] = Point(pedestrian_crossing_ground_truth[image_index-10][(i*2)-1], pedestrian_crossing_ground_truth[image_index-10][i*2]);
+	}
+
+	cv::line(ground_truth_image, points[0], points[1], Scalar(0, 255, 0), 2);
+	cv::line(ground_truth_image, points[0], points[2], Scalar(0, 255, 0), 2);
+	cv::line(ground_truth_image, points[1], points[3], Scalar(0, 255, 0), 2);
+	cv::line(ground_truth_image, points[2], points[3], Scalar(0, 255, 0), 2);
+	imshow("Ground Truth", ground_truth_image);
+}
+
 void MyApplication() {
 	// 	get the image
 	char* file_location = "../media/";
@@ -64,6 +79,8 @@ void MyApplication() {
 		// show output
 		imshow("Output", multispectral_edges);
 
+		get_ground_truth(image_index, original_image);
+		
 		// go to next image
 		char c = cv::waitKey();
 		cv::destroyAllWindows();
