@@ -1,3 +1,0 @@
-/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles/exec.dir
-/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles/edit_cache.dir
-/home/brendanmcc02/Desktop/college/4th-year/semester-1/computer-vision/OpenCVExample/build/CMakeFiles/rebuild_cache.dir

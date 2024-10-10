@@ -47,53 +47,8 @@
 #include <chrono>
 #include <thread>
 
-int liveVideo() {
-	// Create a VideoCapture object and use camera to capture the video
-		VideoCapture cap(1);
-		// Check if camera opened successfully
-		if (!cap.isOpened()) {
-				cout << "Error opening video stream" << endl;
-				return -1;
-		}
-
-		cap.set(cv::CAP_PROP_FRAME_WIDTH, 1024); //3264);
-		cap.set(cv::CAP_PROP_FRAME_HEIGHT, 768); //2448);
-		// Default resolutions of the frame are obtained.The default resolutions are system dependent.
-		int frame_width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
-		int frame_height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
-
-		// Define the codec and create VideoWriter object.The output is stored in 'outcpp.avi' file.
-		VideoWriter video("outcpp.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 20, Size(frame_width, frame_height));
-		chrono::system_clock::time_point capture_time = chrono::system_clock::now();
-		while (1) {
-			this_thread::sleep_until(capture_time);
-			capture_time = capture_time + 1s;
-			Mat frame;
-			// Capture frame-by-frame
-
-			cap >> frame;
-			// If the frame is empty, break immediately
-			if (frame.empty())
-				break;
-			// Write the frame into the file 'outcpp.avi'
-			video.write(frame);
-			// Display the resulting frame   
-			imshow("Frame", frame);
-			// Press  ESC on keyboard to  exit
-			char c = (char)waitKey(1);
-			if (c == 27)
-				break;
-		}
-
-	// When everything done, release the video capture and write object
-	cap.release();
-	video.release();
-	//destroyAllWindows();
-	return 0;
-}
-
 int main(int argc, const char** argv) {
-	// liveVideo();
+
 	char* file_location = "../media/";
 	char* image_files[] = {
 		"TrinityRegentHouse.jpg",
@@ -184,6 +139,13 @@ int main(int argc, const char** argv) {
 		}
 		else cascades.push_back(cascade);
 	}
+
+	MyApplication();
+	// EdgeDemos(image[BIKES_IMAGE_INDEX],image[COATS_IMAGE_INDEX]);
+	
+	/*
+
+	// liveVideo();
 
 	int line_step = 13;
 	Point location( 7, 13 );
@@ -285,5 +247,51 @@ int main(int argc, const char** argv) {
 			break;
 		}
 	} while ((choice != 'x') && (choice != 'X'));
+	*/
+}
+
+int liveVideo() {
+	// Create a VideoCapture object and use camera to capture the video
+		VideoCapture cap(1);
+		// Check if camera opened successfully
+		if (!cap.isOpened()) {
+				cout << "Error opening video stream" << endl;
+				return -1;
+		}
+
+		cap.set(cv::CAP_PROP_FRAME_WIDTH, 1024); //3264);
+		cap.set(cv::CAP_PROP_FRAME_HEIGHT, 768); //2448);
+		// Default resolutions of the frame are obtained.The default resolutions are system dependent.
+		int frame_width = cap.get(cv::CAP_PROP_FRAME_WIDTH);
+		int frame_height = cap.get(cv::CAP_PROP_FRAME_HEIGHT);
+
+		// Define the codec and create VideoWriter object.The output is stored in 'outcpp.avi' file.
+		VideoWriter video("outcpp.avi", cv::VideoWriter::fourcc('M', 'J', 'P', 'G'), 20, Size(frame_width, frame_height));
+		chrono::system_clock::time_point capture_time = chrono::system_clock::now();
+		while (1) {
+			this_thread::sleep_until(capture_time);
+			capture_time = capture_time + 1s;
+			Mat frame;
+			// Capture frame-by-frame
+
+			cap >> frame;
+			// If the frame is empty, break immediately
+			if (frame.empty())
+				break;
+			// Write the frame into the file 'outcpp.avi'
+			video.write(frame);
+			// Display the resulting frame   
+			imshow("Frame", frame);
+			// Press  ESC on keyboard to  exit
+			char c = (char)waitKey(1);
+			if (c == 27)
+				break;
+		}
+
+	// When everything done, release the video capture and write object
+	cap.release();
+	video.release();
+	//destroyAllWindows();
+	return 0;
 }
 
