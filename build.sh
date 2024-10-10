@@ -8,7 +8,9 @@ set -e
 
 #!/bin/bash
 clear
-cd build/
+printf "\nCleaning previous build artifact\n"
+rm -rf build/
+mkdir build/ && cd build/
 printf "\nBuilding...\n"
 cmake ../
 make

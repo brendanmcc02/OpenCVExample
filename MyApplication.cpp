@@ -18,17 +18,29 @@ int pedestrian_crossing_ground_truth[][9] = {
 
 void MyApplication() {
 	for (int image_index = 10; image_index <= 19; image_index++) {
+		// 	get the image
 		char* file_location = "../media/";
 		char filename[200];
 		sprintf(filename, "PC%d.jpg", image_index);
 		string file(file_location);
 		file.append(filename);
-
 		Mat original_image;
 		original_image = imread(file, -1);
-		imshow(filename, original_image);
-		char c = cv::waitKey();
+		// imshow(filename, original_image);
+		
+		// convert to HLS
+		Mat hls_image;
+		cvtColor(original_image, hls_image, COLOR_BGR2HLS);
+		imshow("HLS", hls_image);
 
+		// TODO histogram back project
+		ColourHistogram histogram3D(hls_image, 8);
+		histogram3D.NormaliseHistogram();
+		Mat back_projection_probabilities = histogram3D.BackProject(hls_image);
+		// supply sample pedestrian crossings
+
+		// go to next image
+		char c = cv::waitKey();
 		cv::destroyAllWindows();
 	}
 }
