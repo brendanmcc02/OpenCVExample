@@ -1,4 +1,4 @@
 # TODO
 
-- [ ] draw ground truth
+- [x] draw ground truth
 - [ ] where do I go after canny?

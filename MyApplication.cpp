@@ -20,10 +20,12 @@ void get_ground_truth(int image_index, Mat original_image) {
 	Mat ground_truth_image = original_image.clone();
 	Point * points = new Point[4];
 	
+	// init points
 	for (int i = 1; i < 5; i++) {
 		points[i-1] = Point(pedestrian_crossing_ground_truth[image_index-10][(i*2)-1], pedestrian_crossing_ground_truth[image_index-10][i*2]);
 	}
 
+	// Draw lines
 	cv::line(ground_truth_image, points[0], points[1], Scalar(0, 255, 0), 2);
 	cv::line(ground_truth_image, points[0], points[2], Scalar(0, 255, 0), 2);
 	cv::line(ground_truth_image, points[1], points[3], Scalar(0, 255, 0), 2);
@@ -34,55 +36,62 @@ void get_ground_truth(int image_index, Mat original_image) {
 void MyApplication() {
 	// 	get the image
 	char* file_location = "../media/";
-	const int num_median_iter = 5;
-
+	const int NUM_MEDIAN_BLUR_ITERATIONS = 5;
+	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // must be an odd number >= 3
+	const int THRESHOLD_VALUE = 100;
+	const int MAX_THRESHOLD = 255;
 
 	for (int image_index = 10; image_index <= 19; image_index++) {
+		// get the original image
 		char filename[200];
 		sprintf(filename, "PC%d.jpg", image_index);
 		string file(file_location);
 		file.append(filename);
 		Mat original_image;
 		original_image = imread(file, -1);
-		// imshow(filename, original_image);
-
-		Mat output_image;
+		get_ground_truth(image_index, original_image);
 
 		// Iterative Median smoothing
-		Mat* median_images = new Mat[num_median_iter+1];
+		Mat* median_images = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
 		median_images[0] = original_image;
 
-		for (int i = 0; i < num_median_iter; i++) {
-			medianBlur(median_images[i], median_images[i+1] ,3);
+		for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
+			medianBlur(median_images[i], median_images[i+1], MEDIAN_BLUR_FILTER_SIZE);
 		}
-
-		/*
-		// MSS
-		Mat mss_image;
-		pyrMeanShiftFiltering(median_images[num_median_iter], mss_image, 3, 40, 1);
-		floodFillPostprocess(mss_image, Scalar::all(2));  // colour the MSS
-		*/
 
 		// Canny Edge Detection
 		vector<Mat> input_planes(3);
-		Mat processed_image = median_images[num_median_iter].clone();
+		Mat processed_image = median_images[NUM_MEDIAN_BLUR_ITERATIONS].clone();
 		vector<Mat> output_planes;
 		split(processed_image,output_planes);
-		split(median_images[num_median_iter], input_planes);
-		for (int plane=0; plane < median_images[num_median_iter].channels(); plane++) {
-			Canny(input_planes[plane],output_planes[plane],100,200);
+		split(median_images[NUM_MEDIAN_BLUR_ITERATIONS], input_planes);
+		for (int plane=0; plane < median_images[NUM_MEDIAN_BLUR_ITERATIONS].channels(); plane++) {
+			Canny(input_planes[plane], output_planes[plane], 100, 200);
 		}
 			
 		Mat multispectral_edges;
 		merge(output_planes, multispectral_edges);
 
-		// show output
-		imshow("Output", multispectral_edges);
+		// Binary Threshold - Otsu
+		Mat grayscale_image, otsu_image_binary, otsu_output;
+		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
+		threshold(grayscale_image, otsu_image_binary, THRESHOLD_VALUE, MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
+		cvtColor(otsu_image_binary, otsu_output, COLOR_GRAY2BGR);
 
-		get_ground_truth(image_index, original_image);
+		// show output
+		imshow("Output", otsu_output);
 		
 		// go to next image
 		char c = cv::waitKey();
 		cv::destroyAllWindows();
 	}
 }
+
+/*
+
+// MSS
+Mat mss_image;
+pyrMeanShiftFiltering(median_images[NUM_MEDIAN_BLUR_ITERATIONS], mss_image, 3, 40, 1);
+floodFillPostprocess(mss_image, Scalar::all(2));  // colour the MSS
+
+*/
