@@ -96,7 +96,7 @@ int main(int argc, const char** argv) {
 			return -1;
 		}
 	}
-
+	
 	// Needed for mean shift in histogram demos
 	Rect Surveillance_car_position_frame_124(251,164,64,32);
 	Rect Bicycles_position_frame_180(242,26,37,60);
@@ -141,6 +141,7 @@ int main(int argc, const char** argv) {
 	}
 
 	MyApplication();
+	/*
 	// liveVideo();
 
 	int line_step = 13;
@@ -243,6 +244,7 @@ int main(int argc, const char** argv) {
 			break;
 		}
 	} while ((choice != 'x') && (choice != 'X'));
+	*/
 }
 
 int liveVideo() {

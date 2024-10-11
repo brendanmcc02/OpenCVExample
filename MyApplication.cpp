@@ -38,11 +38,11 @@ void MyApplication() {
 	// 	get the image
 	char* file_location = "../media/";
 	const int NUM_MEDIAN_BLUR_ITERATIONS = 5;
-	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // must be an odd number >= 3
+	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value. must be an odd number >= 3
 	const int BINARY_THRESHOLD_VALUE = 100;
 	const int BINARY_MAX_THRESHOLD = 255;
-	const int CANNY_MIN_THRESHOLD = 150;
-	const int CANNY_MAX_THRESHOLD = 255;
+	const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
+	const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
 
 	for (int image_index = 10; image_index <= 19; image_index++) {
 		// get the original image
@@ -76,14 +76,24 @@ void MyApplication() {
 		merge(output_planes, multispectral_edges);
 
 		// Binary Threshold - Otsu
-		Mat grayscale_image, otsu_image_binary, otsu_output;
+		Mat grayscale_image, otsu_image, otsu_output;
 		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
-		threshold(grayscale_image, otsu_image_binary, BINARY_THRESHOLD_VALUE, 
+		threshold(grayscale_image, otsu_image, BINARY_THRESHOLD_VALUE, 
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
-		cvtColor(otsu_image_binary, otsu_output, COLOR_GRAY2BGR);
+
+		// CCA
+		vector<vector<Point>> contours;
+		vector<Vec4i> hierarchy;
+		Mat binary_image_copy = otsu_image.clone();
+		findContours(binary_image_copy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
+		Mat contours_image = Mat::zeros(otsu_image.size(), CV_8UC3);
+		for (int contour_number = 0; (contour_number<(int)contours.size()); contour_number++) {
+			Scalar colour(rand() & 0xFF, rand() & 0xFF, rand() & 0xFF);
+			drawContours(contours_image, contours, contour_number, colour, FILLED, 8, hierarchy);
+		}
 
 		// show output
-		imshow("Output", otsu_output);
+		imshow("Output", contours_image);
 
 		// go to next image
 		char c = cv::waitKey();
