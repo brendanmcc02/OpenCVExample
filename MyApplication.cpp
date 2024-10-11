@@ -22,7 +22,8 @@ void get_ground_truth(int image_index, Mat original_image) {
 	
 	// init points
 	for (int i = 1; i < 5; i++) {
-		points[i-1] = Point(pedestrian_crossing_ground_truth[image_index-10][(i*2)-1], pedestrian_crossing_ground_truth[image_index-10][i*2]);
+		points[i-1] = Point(pedestrian_crossing_ground_truth[image_index-10][(i*2)-1], 
+							pedestrian_crossing_ground_truth[image_index-10][i*2]);
 	}
 
 	// Draw lines
@@ -38,8 +39,10 @@ void MyApplication() {
 	char* file_location = "../media/";
 	const int NUM_MEDIAN_BLUR_ITERATIONS = 5;
 	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // must be an odd number >= 3
-	const int THRESHOLD_VALUE = 100;
-	const int MAX_THRESHOLD = 255;
+	const int BINARY_THRESHOLD_VALUE = 100;
+	const int BINARY_MAX_THRESHOLD = 255;
+	const int CANNY_MIN_THRESHOLD = 150;
+	const int CANNY_MAX_THRESHOLD = 255;
 
 	for (int image_index = 10; image_index <= 19; image_index++) {
 		// get the original image
@@ -66,7 +69,7 @@ void MyApplication() {
 		split(processed_image,output_planes);
 		split(median_images[NUM_MEDIAN_BLUR_ITERATIONS], input_planes);
 		for (int plane=0; plane < median_images[NUM_MEDIAN_BLUR_ITERATIONS].channels(); plane++) {
-			Canny(input_planes[plane], output_planes[plane], 100, 200);
+			Canny(input_planes[plane], output_planes[plane], CANNY_MIN_THRESHOLD, CANNY_MAX_THRESHOLD);
 		}
 			
 		Mat multispectral_edges;
@@ -75,12 +78,13 @@ void MyApplication() {
 		// Binary Threshold - Otsu
 		Mat grayscale_image, otsu_image_binary, otsu_output;
 		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
-		threshold(grayscale_image, otsu_image_binary, THRESHOLD_VALUE, MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
+		threshold(grayscale_image, otsu_image_binary, BINARY_THRESHOLD_VALUE, 
+				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
 		cvtColor(otsu_image_binary, otsu_output, COLOR_GRAY2BGR);
 
 		// show output
 		imshow("Output", otsu_output);
-		
+
 		// go to next image
 		char c = cv::waitKey();
 		cv::destroyAllWindows();

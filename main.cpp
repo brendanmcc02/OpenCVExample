@@ -141,10 +141,6 @@ int main(int argc, const char** argv) {
 	}
 
 	MyApplication();
-	// EdgeDemos(image[BIKES_IMAGE_INDEX],image[COATS_IMAGE_INDEX]);
-	
-	/*
-
 	// liveVideo();
 
 	int line_step = 13;
@@ -247,7 +243,6 @@ int main(int argc, const char** argv) {
 			break;
 		}
 	} while ((choice != 'x') && (choice != 'X'));
-	*/
 }
 
 int liveVideo() {

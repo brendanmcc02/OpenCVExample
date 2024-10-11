@@ -1,4 +1,6 @@
 # TODO
 
 - [x] draw ground truth
-- [ ] where do I go after canny?
+- [x] binary threshold canny
+- [x] figure out best canny parameters for min/max threshold
+- [ ] figure out shape analysis
