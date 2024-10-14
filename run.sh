@@ -1,5 +1,5 @@
 # this script is intended to run on c++ projects for the Computer Vision module.
-# it will clean, build, and then run the project.
+# it will build and then run the project.
 # this needs to be run in conjunction with a CMakeLists.txt file.
 # this should be placed in the root of your c++ project
 

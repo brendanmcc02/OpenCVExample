@@ -12,7 +12,8 @@
 - [ ] figure out best `NUM_MEDIAN_BLUR_ITERATIONS`
 - [ ] investigate why some crossings have small noise around them
 - [ ] investigate why some crossings are filled in and others have just the boundary
-- [ ] get shape analysis **recognition.cpp line 501**
+- [x] get shape analysis **recognition.cpp line 501**
+- [x] filter by size: `contours[contour_number].size()`
 
 ## Other
 

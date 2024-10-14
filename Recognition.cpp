@@ -532,7 +532,7 @@ void RecognitionDemos( Mat& full_image, Mat& template1, Mat& template2, Mat& tem
         drawContours( contours_image, contours, contour_number, colour, cv::FILLED, 8, hierarchy );
 		char output[500];
 		double area = contourArea(contours[contour_number])+contours[contour_number].size()/2+1;
-		// Process any holes (removing the area from the are of the enclosing contour)
+		// Process any holes (removing the area from the area of the enclosing contour)
 		for (int hole_number=hierarchy[contour_number][2]; (hole_number>=0); hole_number=hierarchy[hole_number][0])
 		{
 			area -= (contourArea(contours[hole_number])-contours[hole_number].size()/2+1);
