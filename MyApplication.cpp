@@ -64,8 +64,6 @@ void MyApplication() {
 			medianBlur(median_images[i], median_images[i+1], MEDIAN_BLUR_FILTER_SIZE);
 		}
 
-		imshow("Median Smoothing", median_images[NUM_MEDIAN_BLUR_ITERATIONS]);
-
 		// Canny Edge Detection
 		vector<Mat> input_planes(3);
 		Mat processed_image = median_images[NUM_MEDIAN_BLUR_ITERATIONS].clone();
@@ -79,16 +77,16 @@ void MyApplication() {
 			
 		Mat multispectral_edges;
 		merge(output_planes, multispectral_edges);
-
-		imshow("Canny Edge Detection", multispectral_edges);
+		Mat output_1 = JoinImagesHorizontally(median_images[NUM_MEDIAN_BLUR_ITERATIONS], "Median Smoothing",
+												multispectral_edges, "Canny Edge Detection", 4);
+		imshow("1 - Smoothing, Edge Detection", output_1);
 
 		// Binary Threshold - Otsu
 		Mat grayscale_image, otsu_image, otsu_output;
 		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
 		threshold(grayscale_image, otsu_image, BINARY_THRESHOLD_VALUE, 
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
-
-		imshow("Otsu Thresholding", otsu_image);
+		imshow("2 - Otsu Threshold", otsu_image);
 
 		// CCA
 		vector<vector<Point>> contours;
