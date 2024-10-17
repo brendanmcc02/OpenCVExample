@@ -44,7 +44,7 @@ void MyApplication() {
 	const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
 	const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
 	const int CONTOUR_SIZE_THRESHOLD = 90;  // tested for optimal value
-	const int EDGE_SIZE_THRESHOLD = 150;  // tested for optimal value
+	const int CONTOUR_AREA_THRESHOLD = 500;  // tested for optimal value
 
 	for (int image_index = 10; image_index <= 19; image_index++) {
 		// get the original image
@@ -55,16 +55,8 @@ void MyApplication() {
 		Mat original_image;
 		original_image = imread(file, -1);
 		Mat ground_truth = get_ground_truth(image_index, original_image);
+		imshow("Original", original_image);
 
-		// HLS
-		Mat hls_image;
-		cvtColor(original_image, hls_image, COLOR_BGR2HLS);
-		vector<Mat> hls_channels(3);
-		split(hls_image, hls_channels);
-		equalizeHist(hls_channels[1], hls_channels[1]);
-		imshow("Equalized Luminance", hls_channels[1]);
-
-		/*
 		// Iterative Median smoothing
 		Mat* median_images = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
 		median_images[0] = original_image;
@@ -73,7 +65,7 @@ void MyApplication() {
 			medianBlur(median_images[i], median_images[i+1], MEDIAN_BLUR_FILTER_SIZE);
 		}
 
-		imshow("Median Smoothing", median_images[NUM_MEDIAN_BLUR_ITERATIONS]);
+		// imshow("Median Smoothing", median_images[NUM_MEDIAN_BLUR_ITERATIONS]);
 
 		// Canny Edge Detection
 		vector<Mat> input_planes(3);
@@ -88,57 +80,58 @@ void MyApplication() {
 			
 		Mat multispectral_edges;
 		merge(output_planes, multispectral_edges);
-		imshow("Canny Edge Detection", multispectral_edges);
+		// imshow("Canny Edge Detection", multispectral_edges);
 
 		// Binary Threshold - Otsu
 		Mat grayscale_image, otsu_image, otsu_output;
 		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
 		threshold(grayscale_image, otsu_image, BINARY_THRESHOLD_VALUE, 
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
-		imshow("2 - Otsu Threshold", otsu_image);
+		// imshow("Otsu Threshold", otsu_image);
+
+		//////////////////////////////////////////
 
 		// CCA
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
 		Mat binary_image_copy = otsu_image.clone();
 		findContours(binary_image_copy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
+		int contours_length = contours.size();
+		vector<vector<Point>> hulls(contours_length);
 		Mat contours_image = Mat::zeros(otsu_image.size(), CV_8UC3);
+		Mat hull_image = Mat::zeros(otsu_image.size(), CV_8UC3);
 		Mat min_bound_rectangle_image = Mat::zeros(otsu_image.size(), CV_8UC3);
-		vector<RotatedRect> min_bounding_rectangle(contours.size());
+		vector<RotatedRect> min_bounding_rectangle(contours_length);
 
 		// Shape analysis
-		for (int c = 0; c < contours.size(); c++) {
-			// filter by contour size
+		for (int c = 0; c < contours_length; c++) {
+			// filter by contour perimeter
+			int contour_area = contourArea(contours[c]);
 			if (contours[c].size() >= CONTOUR_SIZE_THRESHOLD) {
 				drawContours(contours_image, contours, c, Scalar(255, 255, 255), FILLED, 8, hierarchy);
 				// Determine the minimum bounding rectangle
 				min_bounding_rectangle[c] = minAreaRect(contours[c]);
-				Point2f bounding_rect_points[4];
-				min_bounding_rectangle[c].points(bounding_rect_points);
-				int length = norm(bounding_rect_points[0] - bounding_rect_points[1]);
-				int width = norm(bounding_rect_points[1] - bounding_rect_points[2]);
-				// filter by edge (length or width) size
-				if (length <= EDGE_SIZE_THRESHOLD && width <= EDGE_SIZE_THRESHOLD) {
-					line(min_bound_rectangle_image, bounding_rect_points[0], bounding_rect_points[1], Scalar(255, 0, 0));
-					line(min_bound_rectangle_image, bounding_rect_points[1], bounding_rect_points[2], Scalar(255, 0, 0));
-					line(min_bound_rectangle_image, bounding_rect_points[2], bounding_rect_points[3], Scalar(255, 0, 0));
-					line(min_bound_rectangle_image, bounding_rect_points[3], bounding_rect_points[0], Scalar(255, 0, 0));
+				int min_bound_rect_area = min_bounding_rectangle[c].size.width * min_bounding_rectangle[c].size.height;
+				if (min_bound_rect_area >= CONTOUR_AREA_THRESHOLD) {
+					// Draw the convex hull
+					convexHull(contours[c], hulls[c]);
+					drawContours(hull_image, hulls, c, Scalar(0, 0, 255));
 				}
 			}
 		}
 
-		imshow("CCA", contours_image);
-		imshow("Shape Analysis", min_bound_rectangle_image);
+		// imshow("CCA", contours_image);
+		imshow("Hull", hull_image);
 
-		// show output
-		Mat output = min_bound_rectangle_image;
-		Mat split_screen = JoinImagesHorizontally(ground_truth, "Original", output, "Output", 4);
-		imshow("Original vs Output", split_screen);
-		*/
-
+		// // show output
+		// Mat output = hull_image;
+		// Mat split_screen = JoinImagesHorizontally(ground_truth, "Original", output, "Output", 4);
+		// imshow("Original vs Output", split_screen);
+		
 		// go to next image
 		char c = cv::waitKey();
 		cv::destroyAllWindows();
+		
 	}
 }
 
@@ -149,4 +142,17 @@ Mat mss_image;
 pyrMeanShiftFiltering(median_images[NUM_MEDIAN_BLUR_ITERATIONS], mss_image, 3, 40, 1);
 floodFillPostprocess(mss_image, Scalar::all(2));  // colour the MSS
 
+/*
+// HLS
+Mat hls_image;
+Mat equalized_hls_image, colored_hls_image;
+cvtColor(original_image, hls_image, COLOR_BGR2HLS);
+imshow("HLS pre equalize", hls_image);
+vector<Mat> hls_channels(3);
+split(hls_image, hls_channels);
+equalizeHist(hls_channels[1], hls_channels[1]);
+merge(hls_channels, hls_image);
+imshow("HLS post equalize", hls_image);
+// cvtColor(hls_image, colored_hls_image, COLOR_HLS2BGR);
+// cvtColor(colored_hls_image, colored_hls_image, COLOR_BGR2GRAY);
 */
