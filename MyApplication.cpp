@@ -37,14 +37,19 @@ Mat get_ground_truth(int image_index, Mat original_image) {
 void MyApplication() {
 	// 	get the image
 	char* file_location = "../media/";
-	const int NUM_MEDIAN_BLUR_ITERATIONS = 2;
+	const int NUM_MEDIAN_BLUR_ITERATIONS = 1;  // tested for optimal value
 	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value
 	const int BINARY_THRESHOLD_VALUE = 100;
 	const int BINARY_MAX_THRESHOLD = 255;
+	const int CLOSING_KERNEL_SIZE = 2;  // tested for optimal value
 	const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
 	const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
 	const int CONTOUR_SIZE_THRESHOLD = 90;  // tested for optimal value
-	const int CONTOUR_AREA_THRESHOLD = 3;
+	const int MIN_CONTOUR_AREA_THRESHOLD = 50;  // not super optimal, lots of trade-offs with 100 so I set to a safe 50 for now.
+	const int MAX_CONTOUR_AREA_THRESHOLD = 3000;  // tested for optimal value
+	const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
+	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
+	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
 
 	for (int image_index = 10; image_index <= 19; image_index++) {
 		// get the original image
@@ -59,22 +64,24 @@ void MyApplication() {
 
 		// Iterative Median smoothing
 		Mat* median_images = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
+		Mat smoothed_image;
 		median_images[0] = original_image;
 
 		for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
 			medianBlur(median_images[i], median_images[i+1], MEDIAN_BLUR_FILTER_SIZE);
 		}
 
-		imshow("Median Smoothing", median_images[NUM_MEDIAN_BLUR_ITERATIONS]);
+		smoothed_image = median_images[NUM_MEDIAN_BLUR_ITERATIONS];
+		imshow("Median Smoothing", smoothed_image);
 
 		// Canny Edge Detection
 		vector<Mat> input_planes(3);
-		Mat processed_image = median_images[NUM_MEDIAN_BLUR_ITERATIONS].clone();
+		Mat processed_image = smoothed_image.clone();
 		vector<Mat> output_planes;
 		split(processed_image, output_planes);
-		split(median_images[NUM_MEDIAN_BLUR_ITERATIONS], input_planes);
+		split(smoothed_image, input_planes);
 		
-		for (int plane = 0; plane < median_images[NUM_MEDIAN_BLUR_ITERATIONS].channels(); plane++) {
+		for (int plane = 0; plane < smoothed_image.channels(); plane++) {
 			Canny(input_planes[plane], output_planes[plane], CANNY_MIN_THRESHOLD, CANNY_MAX_THRESHOLD);
 		}
 			
@@ -89,32 +96,49 @@ void MyApplication() {
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
 		imshow("Otsu Threshold", otsu_image);
 
-		// CCA
+		// Closing Operation to fill small edge gaps, better results for CCA
+		Mat closing_image;
+		Mat kernel(CLOSING_KERNEL_SIZE, CLOSING_KERNEL_SIZE, CV_8U, Scalar(1));
+		dilate(otsu_image, closing_image, kernel);
+		erode(closing_image, closing_image, kernel);
+		imshow("Closing", closing_image);
+
+		// CCA & Shape Analysis
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
-		Mat binary_image_copy = otsu_image.clone();
+		Mat binary_image_copy = closing_image.clone();
 		findContours(binary_image_copy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
 		int contours_length = contours.size();
 		vector<vector<Point>> hulls(contours_length);
-		Mat contours_image = Mat::zeros(otsu_image.size(), CV_8UC3);
-		Mat hull_image = Mat::zeros(otsu_image.size(), CV_8UC3);
-		Mat min_bound_rectangle_image = Mat::zeros(otsu_image.size(), CV_8UC3);
+		Mat contours_image = Mat::zeros(closing_image.size(), CV_8UC3);
+		Mat hull_image = Mat::zeros(closing_image.size(), CV_8UC3);
+		Mat min_bound_rectangle_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		vector<RotatedRect> min_bounding_rectangle(contours_length);
 
-		// Shape analysis
 		for (int c = 0; c < contours_length; c++) {
 			// filter by contour perimeter and area
 			int contour_area = contourArea(contours[c]);
-			if (contours[c].size() >= CONTOUR_SIZE_THRESHOLD && contour_area > CONTOUR_AREA_THRESHOLD) {
-				int contour_area = contourArea(contours[c]);
+			if (contours[c].size() >= CONTOUR_SIZE_THRESHOLD && contour_area >= MIN_CONTOUR_AREA_THRESHOLD
+				&& contour_area <= MAX_CONTOUR_AREA_THRESHOLD) {
+				// CCA
 				drawContours(contours_image, contours, c, Scalar(255, 255, 255), FILLED, 8, hierarchy);
-				// get the min-bounding rectangle
-				min_bounding_rectangle[c] = minAreaRect(contours[c]);
-				int min_bound_rect_area = min_bounding_rectangle[c].size.width * min_bounding_rectangle[c].size.height;
-				
-				// Draw the convex hull
+
+				// draw Hulls around edges
 				convexHull(contours[c], hulls[c]);
-				drawContours(hull_image, hulls, c, Scalar(0, 0, 255));
+				int hull_area = contourArea(hulls[c]);
+
+				// filter by hull area
+				if (hull_area >= MIN_HULL_AREA_THRESHOLD && hull_area <= MAX_HULL_AREA_THRESHOLD) {
+					// filter by rectangularity
+					min_bounding_rectangle[c] = minAreaRect(contours[c]);
+					int min_bound_rect_area = min_bounding_rectangle[c].size.width * min_bounding_rectangle[c].size.height;
+					float rectangularity = ((float)hull_area / (float)min_bound_rect_area);
+
+					if (rectangularity >= RECTANGULARITY_THRESHOLD) {
+						// Draw the convex hull
+						drawContours(hull_image, hulls, c, Scalar(0, 0, 255));
+					}
+				}
 			}
 		}
 
