@@ -4,6 +4,7 @@
 set -e
 
 #!/bin/bash
+clear
 rm -rf build/
 mkdir build/
 printf "Cleaned Previous Build artifacts\n"

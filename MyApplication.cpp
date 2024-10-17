@@ -56,6 +56,15 @@ void MyApplication() {
 		original_image = imread(file, -1);
 		Mat ground_truth = get_ground_truth(image_index, original_image);
 
+		// HLS
+		Mat hls_image;
+		cvtColor(original_image, hls_image, COLOR_BGR2HLS);
+		vector<Mat> hls_channels(3);
+		split(hls_image, hls_channels);
+		equalizeHist(hls_channels[1], hls_channels[1]);
+		imshow("Equalized Luminance", hls_channels[1]);
+
+		/*
 		// Iterative Median smoothing
 		Mat* median_images = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
 		median_images[0] = original_image;
@@ -63,6 +72,8 @@ void MyApplication() {
 		for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
 			medianBlur(median_images[i], median_images[i+1], MEDIAN_BLUR_FILTER_SIZE);
 		}
+
+		imshow("Median Smoothing", median_images[NUM_MEDIAN_BLUR_ITERATIONS]);
 
 		// Canny Edge Detection
 		vector<Mat> input_planes(3);
@@ -77,9 +88,7 @@ void MyApplication() {
 			
 		Mat multispectral_edges;
 		merge(output_planes, multispectral_edges);
-		Mat output_1 = JoinImagesHorizontally(median_images[NUM_MEDIAN_BLUR_ITERATIONS], "Median Smoothing",
-												multispectral_edges, "Canny Edge Detection", 4);
-		imshow("1 - Smoothing, Edge Detection", output_1);
+		imshow("Canny Edge Detection", multispectral_edges);
 
 		// Binary Threshold - Otsu
 		Mat grayscale_image, otsu_image, otsu_output;
@@ -125,6 +134,7 @@ void MyApplication() {
 		Mat output = min_bound_rectangle_image;
 		Mat split_screen = JoinImagesHorizontally(ground_truth, "Original", output, "Output", 4);
 		imshow("Original vs Output", split_screen);
+		*/
 
 		// go to next image
 		char c = cv::waitKey();
