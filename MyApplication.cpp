@@ -37,14 +37,14 @@ Mat get_ground_truth(int image_index, Mat original_image) {
 void MyApplication() {
 	// 	get the image
 	char* file_location = "../media/";
-	const int NUM_MEDIAN_BLUR_ITERATIONS = 10;
+	const int NUM_MEDIAN_BLUR_ITERATIONS = 2;
 	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value
 	const int BINARY_THRESHOLD_VALUE = 100;
 	const int BINARY_MAX_THRESHOLD = 255;
 	const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
 	const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
 	const int CONTOUR_SIZE_THRESHOLD = 90;  // tested for optimal value
-	const int CONTOUR_AREA_THRESHOLD = 500;  // tested for optimal value
+	const int CONTOUR_AREA_THRESHOLD = 3;
 
 	for (int image_index = 10; image_index <= 19; image_index++) {
 		// get the original image
@@ -65,7 +65,7 @@ void MyApplication() {
 			medianBlur(median_images[i], median_images[i+1], MEDIAN_BLUR_FILTER_SIZE);
 		}
 
-		// imshow("Median Smoothing", median_images[NUM_MEDIAN_BLUR_ITERATIONS]);
+		imshow("Median Smoothing", median_images[NUM_MEDIAN_BLUR_ITERATIONS]);
 
 		// Canny Edge Detection
 		vector<Mat> input_planes(3);
@@ -80,14 +80,14 @@ void MyApplication() {
 			
 		Mat multispectral_edges;
 		merge(output_planes, multispectral_edges);
-		// imshow("Canny Edge Detection", multispectral_edges);
+		imshow("Canny Edge Detection", multispectral_edges);
 
 		// Binary Threshold - Otsu
 		Mat grayscale_image, otsu_image, otsu_output;
 		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
 		threshold(grayscale_image, otsu_image, BINARY_THRESHOLD_VALUE, 
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
-		// imshow("Otsu Threshold", otsu_image);
+		imshow("Otsu Threshold", otsu_image);
 
 		// CCA
 		vector<vector<Point>> contours;
@@ -103,24 +103,24 @@ void MyApplication() {
 
 		// Shape analysis
 		for (int c = 0; c < contours_length; c++) {
-			// filter by contour perimeter
+			// filter by contour perimeter and area
 			int contour_area = contourArea(contours[c]);
-			if (contours[c].size() >= CONTOUR_SIZE_THRESHOLD) {
+			if (contours[c].size() >= CONTOUR_SIZE_THRESHOLD && contour_area > CONTOUR_AREA_THRESHOLD) {
+				int contour_area = contourArea(contours[c]);
 				drawContours(contours_image, contours, c, Scalar(255, 255, 255), FILLED, 8, hierarchy);
-				// Determine the minimum bounding rectangle
+				// get the min-bounding rectangle
 				min_bounding_rectangle[c] = minAreaRect(contours[c]);
 				int min_bound_rect_area = min_bounding_rectangle[c].size.width * min_bounding_rectangle[c].size.height;
-				if (min_bound_rect_area >= CONTOUR_AREA_THRESHOLD) {
-					// Draw the convex hull
-					convexHull(contours[c], hulls[c]);
-					drawContours(hull_image, hulls, c, Scalar(0, 0, 255));
-				}
+				
+				// Draw the convex hull
+				convexHull(contours[c], hulls[c]);
+				drawContours(hull_image, hulls, c, Scalar(0, 0, 255));
 			}
 		}
 
-		// imshow("CCA", contours_image);
+		imshow("CCA", contours_image);
 		imshow("Hull", hull_image);
-		
+
 		// go to next image
 		char c = cv::waitKey();
 		cv::destroyAllWindows();
