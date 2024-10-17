@@ -89,8 +89,6 @@ void MyApplication() {
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
 		// imshow("Otsu Threshold", otsu_image);
 
-		//////////////////////////////////////////
-
 		// CCA
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
@@ -122,11 +120,6 @@ void MyApplication() {
 
 		// imshow("CCA", contours_image);
 		imshow("Hull", hull_image);
-
-		// // show output
-		// Mat output = hull_image;
-		// Mat split_screen = JoinImagesHorizontally(ground_truth, "Original", output, "Output", 4);
-		// imshow("Original vs Output", split_screen);
 		
 		// go to next image
 		char c = cv::waitKey();
@@ -134,25 +127,3 @@ void MyApplication() {
 		
 	}
 }
-
-/*
-
-// MSS
-Mat mss_image;
-pyrMeanShiftFiltering(median_images[NUM_MEDIAN_BLUR_ITERATIONS], mss_image, 3, 40, 1);
-floodFillPostprocess(mss_image, Scalar::all(2));  // colour the MSS
-
-/*
-// HLS
-Mat hls_image;
-Mat equalized_hls_image, colored_hls_image;
-cvtColor(original_image, hls_image, COLOR_BGR2HLS);
-imshow("HLS pre equalize", hls_image);
-vector<Mat> hls_channels(3);
-split(hls_image, hls_channels);
-equalizeHist(hls_channels[1], hls_channels[1]);
-merge(hls_channels, hls_image);
-imshow("HLS post equalize", hls_image);
-// cvtColor(hls_image, colored_hls_image, COLOR_HLS2BGR);
-// cvtColor(colored_hls_image, colored_hls_image, COLOR_BGR2GRAY);
-*/
