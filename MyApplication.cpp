@@ -212,17 +212,38 @@ void MyApplication() {
 		// for each hull, calculate its distance to other hulls
 		for (int i = 0; i < white_regions_indexes_length; i++) {
 			bool isClose = false;
-			for (int j = 0; j < white_regions_indexes_length && !isClose && j != i; j++) {
+			for (int j = 0; j < white_regions_indexes_length && j != i; j++) {
 				float dist = norm(hull_centers[i] - hull_centers[j]);
 				cout << "dist: " << dist << "\n";
-				if (dist <= MAX_HULL_DISTANCE_THRESHOLD) {
-					isClose = true;
-				}
-			}
+				if (dist > MIN_HULL_DISTANCE_THRESHOLD && dist <= MAX_HULL_DISTANCE_THRESHOLD) {
+					close_hulls_indexes.push_back(white_regions_indexes[i]);
+					j = white_regions_indexes_length; // end for loop
+				} 
+				// some hulls overlap with eachother -> pick the one with closer resemblance to white 
+				else if (dist <= MIN_HULL_DISTANCE_THRESHOLD) {
+					// get the average colour of the region
+					Mat mask = Mat::zeros(original_image.size(), CV_8UC1);
+					fillConvexPoly(mask, hulls_unfiltered[white_regions_indexes[i]], Scalar(255));
+					Scalar meanColor = mean(original_image, mask);
+					// compare it with white
+					Scalar white = Scalar(255, 255, 255);
+					float color_dist_1 = color_distance(white, meanColor);
+					// get the average colour of the other overlapping region
+					mask = Mat::zeros(original_image.size(), CV_8UC1);
+					fillConvexPoly(mask, hulls_unfiltered[white_regions_indexes[j]], Scalar(255));
+					meanColor = mean(original_image, mask);
+					// compare it with white
+					float color_dist_2 = color_distance(white, meanColor);
 
-			if (isClose) {
-				close_hulls_indexes.push_back(white_regions_indexes[i]);
-				cout << "close index: " << white_regions_indexes[i] << "\n";
+					if (color_dist_1 <= color_dist_2) {
+						cout << "it happended!";
+						close_hulls_indexes.push_back(white_regions_indexes[i]);
+						j = white_regions_indexes_length; // end for loop
+					} 
+					// else {
+					// 	close_hulls_indexes.push_back(white_regions_indexes[j]);
+					// }
+				}
 			}
 		}
 
@@ -231,6 +252,7 @@ void MyApplication() {
 		for (int i = 0; i < close_hulls_indexes_length; i++) {
 			drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], Scalar(255, 0, 0), 2);
 		}
+		cout << close_hulls_indexes_length << " close hulls\n";
 
 		imshow("Close Contours", close_image);
 
