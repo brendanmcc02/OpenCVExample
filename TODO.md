@@ -14,7 +14,7 @@
 - [x] closing after otsu
 - [x] filter by hull area
 - [x] filter by rectangularity of hulls (`min_bound_rect_area/object_area`)
-- [ ] filter hulls that are far away from each other
+- [ ] filter isolated hulls
 - [x] overlay hulls on real image, check for white-ish color
 
 ## Other

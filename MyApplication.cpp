@@ -61,7 +61,7 @@ void MyApplication() {
 	const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
 	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
 	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
-	const float HULL_DISTANCE_THRESHOLD = 1000000.0;
+	const float HULL_DISTANCE_THRESHOLD = 200.0;
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 
 	// 	get the image
@@ -166,7 +166,7 @@ void MyApplication() {
 		// imshow("Hull", hull_image);
 		imshow("Overlay", overlay_image);
 
-		// Filter hulls that are far away from each other
+		// Filter hulls that are isolated
 		vector<vector<Point>> close_hulls(0);
 		vector<Point> hull_centers(0);
 		Mat close_hulls_image = original_image.clone();
@@ -183,17 +183,17 @@ void MyApplication() {
 		}
 
 		// for each hull, calculate its distance to other hulls
-		for (int c = 0; c < hull_filtered_length; c++) {
+		for (int i = 0; i < hull_filtered_length; i++) {
 			bool isClose = false;
-			for (int k = 0; k < hull_filtered_length && !isClose && k != c; k++) {
-				float dist = norm(hull_centers[c] - hull_centers[k]);
+			for (int j = 0; j < hull_filtered_length && !isClose && j != i; j++) {
+				float dist = norm(hull_centers[i] - hull_centers[j]);
 				if (dist <= HULL_DISTANCE_THRESHOLD) {
 					isClose = true;
 				}
 			}
 
 			if (isClose) {
-				close_hulls.push_back(hulls_filtered[c]);
+				close_hulls.push_back(hulls_filtered[i]);
 			}
 		}
 
@@ -226,16 +226,6 @@ void MyApplication() {
 		// }
 		
 		// imshow("Potential Crossings", potential_image);
-
-		// // Hough Transform
-		// Mat hough_image_gray;
-		// vector<Vec2f> hough_lines;
-		// cvtColor(hull_image, hough_image_gray, COLOR_BGR2GRAY);
-		// HoughLines(hough_image_gray, hough_lines, 1, PI/200.0, 100);
-		// Mat hough_lines_image = hull_image.clone();
-		// DrawLines(hough_lines_image, hough_lines, Scalar(0, 255, 0));
-
-		// imshow("Hough Lines", hough_lines_image);
 
 		// go to next image
 		char c = cv::waitKey();
