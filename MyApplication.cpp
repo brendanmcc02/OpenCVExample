@@ -31,12 +31,23 @@ Mat get_ground_truth(int image_index, Mat original_image) {
 	cv::line(ground_truth_image, points[0], points[2], Scalar(0, 255, 0), 2);
 	cv::line(ground_truth_image, points[1], points[3], Scalar(0, 255, 0), 2);
 	cv::line(ground_truth_image, points[2], points[3], Scalar(0, 255, 0), 2);
+
 	return ground_truth_image;
 }
 
+float color_distance(const Scalar& s1, const Scalar& s2) {
+    float dist = 0;
+
+    for (int i = 0; i < 3; ++i) {
+        dist += (s1[i] - s2[i]) * (s1[i] - s2[i]);
+    }
+
+    return sqrt(dist);
+}
+
 void MyApplication() {
-	// 	get the image
-	char* file_location = "../media/";
+	
+	// TODO make these safer and increase boundaries?
 	const int NUM_MEDIAN_BLUR_ITERATIONS = 1;  // tested for optimal value
 	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value
 	const int BINARY_THRESHOLD_VALUE = 100;
@@ -50,7 +61,11 @@ void MyApplication() {
 	const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
 	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
 	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
+	const float HULL_DISTANCE_THRESHOLD = 1000000.0;
+	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 
+	// 	get the image
+	char* file_location = "../media/";
 	for (int image_index = 10; image_index <= 19; image_index++) {
 		// get the original image
 		char filename[200];
@@ -63,8 +78,8 @@ void MyApplication() {
 		imshow("Original", original_image);
 
 		// Iterative Median smoothing
-		Mat* median_images = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
 		Mat smoothed_image;
+		Mat* median_images = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
 		median_images[0] = original_image;
 
 		for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
@@ -104,12 +119,14 @@ void MyApplication() {
 		imshow("Closing", closing_image);
 
 		// CCA & Shape Analysis
+		Mat overlay_image = original_image.clone();
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
 		Mat binary_image_copy = closing_image.clone();
 		findContours(binary_image_copy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
 		int contours_length = contours.size();
-		vector<vector<Point>> hulls(contours_length);
+		vector<vector<Point>> hulls_unfiltered(contours_length);
+		vector<vector<Point>> hulls_filtered(0);
 		Mat contours_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		Mat hull_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		Mat min_bound_rectangle_image = Mat::zeros(closing_image.size(), CV_8UC3);
@@ -124,26 +141,101 @@ void MyApplication() {
 				drawContours(contours_image, contours, c, Scalar(255, 255, 255), FILLED, 8, hierarchy);
 
 				// draw Hulls around edges
-				convexHull(contours[c], hulls[c]);
-				int hull_area = contourArea(hulls[c]);
+				convexHull(contours[c], hulls_unfiltered[c]);
+				int hull_area = contourArea(hulls_unfiltered[c]);
 
 				// filter by hull area
 				if (hull_area >= MIN_HULL_AREA_THRESHOLD && hull_area <= MAX_HULL_AREA_THRESHOLD) {
-					// filter by rectangularity
 					min_bounding_rectangle[c] = minAreaRect(contours[c]);
 					int min_bound_rect_area = min_bounding_rectangle[c].size.width * min_bounding_rectangle[c].size.height;
 					float rectangularity = ((float)hull_area / (float)min_bound_rect_area);
-
+					
+					// filter by rectangularity
 					if (rectangularity >= RECTANGULARITY_THRESHOLD) {
 						// Draw the convex hull
-						drawContours(hull_image, hulls, c, Scalar(0, 0, 255));
+						drawContours(hull_image, hulls_unfiltered, c, Scalar(255, 0, 0));
+						drawContours(overlay_image, hulls_unfiltered, c, Scalar(255, 0, 0), 2);
+						// add to filtered hull list
+						hulls_filtered.push_back(contours[c]);
 					}
 				}
 			}
 		}
 
 		imshow("CCA", contours_image);
-		imshow("Hull", hull_image);
+		// imshow("Hull", hull_image);
+		imshow("Overlay", overlay_image);
+
+		// Filter hulls that are far away from each other
+		vector<vector<Point>> close_hulls(0);
+		vector<Point> hull_centers(0);
+		Mat close_hulls_image = original_image.clone();
+		int hull_filtered_length = hulls_filtered.size();
+		// get center point of each hull
+		for (int c = 0; c < hull_filtered_length; c++) {
+			Moments m = moments(hulls_filtered[c]);
+
+			if (m.m00 != 0) {
+				int center_x = m.m10 / m.m00;
+            	int center_y = m.m01 / m.m00;
+				hull_centers.push_back(Point(center_x, center_y));
+			}
+		}
+
+		// for each hull, calculate its distance to other hulls
+		for (int c = 0; c < hull_filtered_length; c++) {
+			bool isClose = false;
+			for (int k = 0; k < hull_filtered_length && !isClose && k != c; k++) {
+				float dist = norm(hull_centers[c] - hull_centers[k]);
+				if (dist <= HULL_DISTANCE_THRESHOLD) {
+					isClose = true;
+				}
+			}
+
+			if (isClose) {
+				close_hulls.push_back(hulls_filtered[c]);
+			}
+		}
+
+		// draw the close hulls
+		int close_hulls_length = close_hulls.size();
+		for (int c = 0; c < close_hulls_length; c++) {
+			drawContours(close_hulls_image, close_hulls, c, Scalar(255, 0, 0), 2);
+		}
+
+		imshow("Close Hulls", close_hulls_image);
+
+		// // todo change variables after close_hulls
+		// // Check if region is white-ish
+		// vector<vector<Point>> potential_pedestrian_crossings(0);
+		// Mat potential_image = original_image.clone();
+		// int hull_filtered_length = hulls_filtered.size();
+		// for (int c = 0; c < hull_filtered_length; c++) {
+		// 	// get the average colour of the region
+		// 	Mat mask = Mat::zeros(original_image.size(), CV_8UC1);
+		// 	fillConvexPoly(mask, hulls_filtered[c], Scalar(255));
+		// 	Scalar meanColor = mean(original_image, mask);
+
+		// 	// compare it with white
+		// 	Scalar white = Scalar(255, 255, 255);
+		// 	float color_dist = color_distance(white, meanColor);
+		// 	if (color_dist <= COLOR_DISTANCE_THRESHOLD) {
+		// 		potential_pedestrian_crossings.push_back(hulls_filtered[c]);
+		// 		drawContours(potential_image, hulls_filtered, c, Scalar(255, 0, 0), 2);
+		// 	}
+		// }
+		
+		// imshow("Potential Crossings", potential_image);
+
+		// // Hough Transform
+		// Mat hough_image_gray;
+		// vector<Vec2f> hough_lines;
+		// cvtColor(hull_image, hough_image_gray, COLOR_BGR2GRAY);
+		// HoughLines(hough_image_gray, hough_lines, 1, PI/200.0, 100);
+		// Mat hough_lines_image = hull_image.clone();
+		// DrawLines(hough_lines_image, hough_lines, Scalar(0, 255, 0));
+
+		// imshow("Hough Lines", hough_lines_image);
 
 		// go to next image
 		char c = cv::waitKey();
