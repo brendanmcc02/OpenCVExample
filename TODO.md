@@ -14,9 +14,10 @@
 - [x] closing after otsu
 - [x] filter by hull area
 - [x] filter by rectangularity of hulls (`min_bound_rect_area/object_area`)
-- [ ] ~~filter isolated hulls~~ 
 - [x] overlay hulls on real image, check for white-ish color
 - [x] fix hulls being different shape on filtered
+- [x] filter isolated hulls
+- [ ] deal with hulls that strongly overlap
 
 ## Other
 

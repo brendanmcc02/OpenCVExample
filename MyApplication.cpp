@@ -61,13 +61,14 @@ void MyApplication() {
 	const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
 	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
 	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
-	const float HULL_DISTANCE_THRESHOLD = 200.0;
+	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;
+	const float MAX_HULL_DISTANCE_THRESHOLD = 500.0;  // tested for optimal value
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 
 	// 	get the image
 	char* file_location = "../media/";
 	for (int image_index = 10; image_index <= 19; image_index++) {
-		// get the original image
+		// Get the original image
 		char filename[200];
 		sprintf(filename, "PC%d.jpg", image_index);
 		string file(file_location);
@@ -104,13 +105,13 @@ void MyApplication() {
 		Mat output_2 = JoinImagesHorizontally(output_1, "", multispectral_edges, "Canny Edge Detection");
 		imshow("Output 1", output_2);
 
-		// Binary Threshold - Otsu
+		// Otsu Thresholding
 		Mat grayscale_image, otsu_image, otsu_output;
 		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
 		threshold(grayscale_image, otsu_image, BINARY_THRESHOLD_VALUE, 
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
 
-		// Closing Operation to fill small edge gaps, better results for CCA
+		// Closing Operation: to fill small edge gaps, better results for CCA
 		Mat closing_image;
 		Mat kernel(CLOSING_KERNEL_SIZE, CLOSING_KERNEL_SIZE, CV_8U, Scalar(1));
 		dilate(otsu_image, closing_image, kernel);
@@ -190,6 +191,48 @@ void MyApplication() {
 		
 		Mat output_6 = JoinImagesHorizontally(output_5, "", white_regions_image, "White regions");
 		imshow("Output 3", output_6);
+
+		// Filter isolated contours
+		vector<int> close_hulls_indexes(0);
+		vector<Point> hull_centers(0);
+		Mat close_image = original_image.clone();
+		int white_regions_indexes_length = white_regions_indexes.size();
+		// get center point of each hull
+		for (int i = 0; i < white_regions_indexes_length; i++) {
+			Moments m = moments(hulls_unfiltered[white_regions_indexes[i]]);
+
+			if (m.m00 != 0) {
+				int center_x = m.m10 / m.m00;
+            	int center_y = m.m01 / m.m00;
+				hull_centers.push_back(Point(center_x, center_y));
+				// circle(close_image, Point(center_x, center_y), 5, Scalar(255), -1);
+			}
+		}
+
+		// for each hull, calculate its distance to other hulls
+		for (int i = 0; i < white_regions_indexes_length; i++) {
+			bool isClose = false;
+			for (int j = 0; j < white_regions_indexes_length && !isClose && j != i; j++) {
+				float dist = norm(hull_centers[i] - hull_centers[j]);
+				cout << "dist: " << dist << "\n";
+				if (dist <= MAX_HULL_DISTANCE_THRESHOLD) {
+					isClose = true;
+				}
+			}
+
+			if (isClose) {
+				close_hulls_indexes.push_back(white_regions_indexes[i]);
+				cout << "close index: " << white_regions_indexes[i] << "\n";
+			}
+		}
+
+		// draw the close hulls
+		int close_hulls_indexes_length = close_hulls_indexes.size();
+		for (int i = 0; i < close_hulls_indexes_length; i++) {
+			drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], Scalar(255, 0, 0), 2);
+		}
+
+		imshow("Close Contours", close_image);
 
 		// go to next image
 		char c = cv::waitKey();
