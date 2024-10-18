@@ -16,7 +16,7 @@
 - [x] filter by rectangularity of hulls (`min_bound_rect_area/object_area`)
 - [x] overlay hulls on real image, check for white-ish color
 - [x] fix hulls being different shape on filtered
-- [x] filter isolated hulls
+- [ ] filter isolated hulls
 - [ ] deal with hulls that strongly overlap
 
 ## Other

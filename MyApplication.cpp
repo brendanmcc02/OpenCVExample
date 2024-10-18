@@ -62,7 +62,7 @@ void MyApplication() {
 	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
 	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
 	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;
-	const float MAX_HULL_DISTANCE_THRESHOLD = 500.0;  // tested for optimal value
+	const float MAX_HULL_DISTANCE_THRESHOLD = 2000.0;
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 
 	// 	get the image
@@ -192,6 +192,7 @@ void MyApplication() {
 		Mat output_6 = JoinImagesHorizontally(output_5, "", white_regions_image, "White regions");
 		imshow("Output 3", output_6);
 
+		// GETTING CENTER POINTS WORKS
 		// Filter isolated contours
 		vector<int> close_hulls_indexes(0);
 		vector<Point> hull_centers(0);
@@ -205,54 +206,34 @@ void MyApplication() {
 				int center_x = m.m10 / m.m00;
             	int center_y = m.m01 / m.m00;
 				hull_centers.push_back(Point(center_x, center_y));
-				// circle(close_image, Point(center_x, center_y), 5, Scalar(255), -1);
+				circle(close_image, Point(center_x, center_y), 5, Scalar(255), -1);
 			}
 		}
 
+		// WHERE I LEFT OFF:
+		// White regions works really well, filtering isolated contours is really confusing and weird results.
+		// check this code???
 		// for each hull, calculate its distance to other hulls
 		for (int i = 0; i < white_regions_indexes_length; i++) {
-			bool isClose = false;
 			for (int j = 0; j < white_regions_indexes_length && j != i; j++) {
 				float dist = norm(hull_centers[i] - hull_centers[j]);
 				cout << "dist: " << dist << "\n";
 				if (dist > MIN_HULL_DISTANCE_THRESHOLD && dist <= MAX_HULL_DISTANCE_THRESHOLD) {
 					close_hulls_indexes.push_back(white_regions_indexes[i]);
-					j = white_regions_indexes_length; // end for loop
-				} 
-				// some hulls overlap with eachother -> pick the one with closer resemblance to white 
-				else if (dist <= MIN_HULL_DISTANCE_THRESHOLD) {
-					// get the average colour of the region
-					Mat mask = Mat::zeros(original_image.size(), CV_8UC1);
-					fillConvexPoly(mask, hulls_unfiltered[white_regions_indexes[i]], Scalar(255));
-					Scalar meanColor = mean(original_image, mask);
-					// compare it with white
-					Scalar white = Scalar(255, 255, 255);
-					float color_dist_1 = color_distance(white, meanColor);
-					// get the average colour of the other overlapping region
-					mask = Mat::zeros(original_image.size(), CV_8UC1);
-					fillConvexPoly(mask, hulls_unfiltered[white_regions_indexes[j]], Scalar(255));
-					meanColor = mean(original_image, mask);
-					// compare it with white
-					float color_dist_2 = color_distance(white, meanColor);
-
-					if (color_dist_1 <= color_dist_2) {
-						cout << "it happended!";
-						close_hulls_indexes.push_back(white_regions_indexes[i]);
-						j = white_regions_indexes_length; // end for loop
-					} 
-					// else {
-					// 	close_hulls_indexes.push_back(white_regions_indexes[j]);
-					// }
+					j = white_regions_indexes_length; // end inner for loop
+					cout << "end\n";
+				} else {
+					cout << "oops\n";
 				}
 			}
 		}
 
-		// draw the close hulls
-		int close_hulls_indexes_length = close_hulls_indexes.size();
-		for (int i = 0; i < close_hulls_indexes_length; i++) {
-			drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], Scalar(255, 0, 0), 2);
-		}
-		cout << close_hulls_indexes_length << " close hulls\n";
+		// // draw the close hulls
+		// int close_hulls_indexes_length = close_hulls_indexes.size();
+		// for (int i = 0; i < close_hulls_indexes_length; i++) {
+		// 	drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], Scalar(255, 0, 0), 2);
+		// }
+		// cout << close_hulls_indexes_length << " close hulls\n";
 
 		imshow("Close Contours", close_image);
 
