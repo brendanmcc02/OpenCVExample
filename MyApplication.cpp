@@ -128,37 +128,37 @@ void MyApplication() {
 		findContours(binary_image_copy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
 		int contours_length = contours.size();
 		vector<vector<Point>> hulls_unfiltered(contours_length);
-		vector<vector<Point>> hulls_filtered(0);
+		vector<int> hulls_filtered_indexes(0);
 		Mat contours_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		Mat hull_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		Mat min_bound_rectangle_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		vector<RotatedRect> min_bounding_rectangle(contours_length);
 
-		for (int c = 0; c < contours_length; c++) {
+		for (int i = 0; i < contours_length; i++) {
 			// filter by contour perimeter and area
-			int contour_area = contourArea(contours[c]);
-			if (contours[c].size() >= CONTOUR_SIZE_THRESHOLD && contour_area >= MIN_CONTOUR_AREA_THRESHOLD
+			int contour_area = contourArea(contours[i]);
+			if (contours[i].size() >= CONTOUR_SIZE_THRESHOLD && contour_area >= MIN_CONTOUR_AREA_THRESHOLD
 				&& contour_area <= MAX_CONTOUR_AREA_THRESHOLD) {
 				// CCA
-				drawContours(contours_image, contours, c, Scalar(255, 255, 255), FILLED, 8, hierarchy);
+				drawContours(contours_image, contours, i, Scalar(255, 255, 255), FILLED, 8, hierarchy);
 
 				// draw Hulls around edges
-				convexHull(contours[c], hulls_unfiltered[c]);
-				int hull_area = contourArea(hulls_unfiltered[c]);
+				convexHull(contours[i], hulls_unfiltered[i]);
+				int hull_area = contourArea(hulls_unfiltered[i]);
 
 				// filter by hull area
 				if (hull_area >= MIN_HULL_AREA_THRESHOLD && hull_area <= MAX_HULL_AREA_THRESHOLD) {
-					min_bounding_rectangle[c] = minAreaRect(contours[c]);
-					int min_bound_rect_area = min_bounding_rectangle[c].size.width * min_bounding_rectangle[c].size.height;
+					min_bounding_rectangle[i] = minAreaRect(contours[i]);
+					int min_bound_rect_area = min_bounding_rectangle[i].size.width * min_bounding_rectangle[i].size.height;
 					float rectangularity = ((float)hull_area / (float)min_bound_rect_area);
 					
 					// filter by rectangularity
 					if (rectangularity >= RECTANGULARITY_THRESHOLD) {
-						// Draw the convex hull
-						drawContours(hull_image, hulls_unfiltered, c, Scalar(255, 0, 0));
-						drawContours(overlay_image, hulls_unfiltered, c, Scalar(255, 0, 0), 2);
-						// add to filtered hull list
-						hulls_filtered.push_back(contours[c]);
+						// Draw the convex hull on 2 different images
+						drawContours(hull_image, hulls_unfiltered, i, Scalar(255, 0, 0));
+						drawContours(overlay_image, hulls_unfiltered, i, Scalar(255, 0, 0), 2);
+						// add to filtered hull index list
+						hulls_filtered_indexes.push_back(i);
 					}
 				}
 			}
@@ -170,21 +170,21 @@ void MyApplication() {
 		Mat output_5 = JoinImagesHorizontally(hull_image, "Convex Hulls", overlay_image, "Overlayed Convex Hulls");
 
 		// Check if region is white-ish
-		vector<vector<Point>> white_regions(0);
+		vector<int> white_regions_indexes(0);
 		Mat white_regions_image = original_image.clone();
-		int hull_filtered_length = hulls_filtered.size();
-		for (int c = 0; c < hull_filtered_length; c++) {
+		int hulls_filtered_indexes_length = hulls_filtered_indexes.size();
+		for (int i = 0; i < hulls_filtered_indexes_length; i++) {
 			// get the average colour of the region
 			Mat mask = Mat::zeros(original_image.size(), CV_8UC1);
-			fillConvexPoly(mask, hulls_filtered[c], Scalar(255));
+			fillConvexPoly(mask, hulls_unfiltered[hulls_filtered_indexes[i]], Scalar(255));
 			Scalar meanColor = mean(original_image, mask);
 
 			// compare it with white
 			Scalar white = Scalar(255, 255, 255);
 			float color_dist = color_distance(white, meanColor);
 			if (color_dist <= COLOR_DISTANCE_THRESHOLD) {
-				white_regions.push_back(hulls_filtered[c]);
-				drawContours(white_regions_image, hulls_filtered, c, Scalar(255, 0, 0), 2);
+				white_regions_indexes.push_back(hulls_filtered_indexes[i]);
+				drawContours(white_regions_image, hulls_unfiltered, hulls_filtered_indexes[i], Scalar(255, 0, 0), 2);
 			}
 		}
 		
@@ -193,7 +193,6 @@ void MyApplication() {
 
 		// go to next image
 		char c = cv::waitKey();
-		cv::destroyAllWindows();
-		
+		cv::destroyAllWindows();		
 	}
 }

@@ -14,12 +14,13 @@
 - [x] closing after otsu
 - [x] filter by hull area
 - [x] filter by rectangularity of hulls (`min_bound_rect_area/object_area`)
-- [ ] filter isolated hulls
+- [ ] ~~filter isolated hulls~~ 
 - [x] overlay hulls on real image, check for white-ish color
+- [x] fix hulls being different shape on filtered
 
 ## Other
 
-- [ ] change c iter variable to i
+- [x] change c iter variable to i\
 - [ ] hough transform **results aren't very convincing**
 - [ ] change naming to lowerCamelCase
 - [ ] make consts more forgiving/looser? don't want to overfit/over-rely on 10 training images
