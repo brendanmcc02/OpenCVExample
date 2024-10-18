@@ -75,7 +75,6 @@ void MyApplication() {
 		Mat original_image;
 		original_image = imread(file, -1);
 		Mat ground_truth = get_ground_truth(image_index, original_image);
-		imshow("Original", original_image);
 
 		// Iterative Median smoothing
 		Mat smoothed_image;
@@ -87,7 +86,7 @@ void MyApplication() {
 		}
 
 		smoothed_image = median_images[NUM_MEDIAN_BLUR_ITERATIONS];
-		imshow("Median Smoothing", smoothed_image);
+		Mat output_1 = JoinImagesHorizontally(original_image, "Original", smoothed_image, "Median Smoothing");
 
 		// Canny Edge Detection
 		vector<Mat> input_planes(3);
@@ -102,21 +101,24 @@ void MyApplication() {
 			
 		Mat multispectral_edges;
 		merge(output_planes, multispectral_edges);
-		imshow("Canny Edge Detection", multispectral_edges);
+		Mat output_2 = JoinImagesHorizontally(output_1, "", multispectral_edges, "Canny Edge Detection");
+		imshow("Output 1", output_2);
 
 		// Binary Threshold - Otsu
 		Mat grayscale_image, otsu_image, otsu_output;
 		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
 		threshold(grayscale_image, otsu_image, BINARY_THRESHOLD_VALUE, 
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
-		imshow("Otsu Threshold", otsu_image);
 
 		// Closing Operation to fill small edge gaps, better results for CCA
 		Mat closing_image;
 		Mat kernel(CLOSING_KERNEL_SIZE, CLOSING_KERNEL_SIZE, CV_8U, Scalar(1));
 		dilate(otsu_image, closing_image, kernel);
 		erode(closing_image, closing_image, kernel);
-		imshow("Closing", closing_image);
+		Mat otsu_image_display, closing_image_display;
+		cvtColor(otsu_image, otsu_image_display, COLOR_GRAY2BGR);
+		cvtColor(closing_image, closing_image_display, COLOR_GRAY2BGR);
+		Mat output_3 = JoinImagesHorizontally(otsu_image_display, "Otsu Thresholding", closing_image_display, "Closing");
 
 		// CCA & Shape Analysis
 		Mat overlay_image = original_image.clone();
@@ -162,70 +164,32 @@ void MyApplication() {
 			}
 		}
 
-		imshow("CCA", contours_image);
-		// imshow("Hull", hull_image);
-		imshow("Overlay", overlay_image);
+		Mat output_4 = JoinImagesHorizontally(output_3, "", contours_image, "CCA");
+		imshow("Output 2", output_4);
 
-		// Filter hulls that are isolated
-		vector<vector<Point>> close_hulls(0);
-		vector<Point> hull_centers(0);
-		Mat close_hulls_image = original_image.clone();
+		Mat output_5 = JoinImagesHorizontally(hull_image, "Convex Hulls", overlay_image, "Overlayed Convex Hulls");
+
+		// Check if region is white-ish
+		vector<vector<Point>> white_regions(0);
+		Mat white_regions_image = original_image.clone();
 		int hull_filtered_length = hulls_filtered.size();
-		// get center point of each hull
 		for (int c = 0; c < hull_filtered_length; c++) {
-			Moments m = moments(hulls_filtered[c]);
+			// get the average colour of the region
+			Mat mask = Mat::zeros(original_image.size(), CV_8UC1);
+			fillConvexPoly(mask, hulls_filtered[c], Scalar(255));
+			Scalar meanColor = mean(original_image, mask);
 
-			if (m.m00 != 0) {
-				int center_x = m.m10 / m.m00;
-            	int center_y = m.m01 / m.m00;
-				hull_centers.push_back(Point(center_x, center_y));
+			// compare it with white
+			Scalar white = Scalar(255, 255, 255);
+			float color_dist = color_distance(white, meanColor);
+			if (color_dist <= COLOR_DISTANCE_THRESHOLD) {
+				white_regions.push_back(hulls_filtered[c]);
+				drawContours(white_regions_image, hulls_filtered, c, Scalar(255, 0, 0), 2);
 			}
 		}
-
-		// for each hull, calculate its distance to other hulls
-		for (int i = 0; i < hull_filtered_length; i++) {
-			bool isClose = false;
-			for (int j = 0; j < hull_filtered_length && !isClose && j != i; j++) {
-				float dist = norm(hull_centers[i] - hull_centers[j]);
-				if (dist <= HULL_DISTANCE_THRESHOLD) {
-					isClose = true;
-				}
-			}
-
-			if (isClose) {
-				close_hulls.push_back(hulls_filtered[i]);
-			}
-		}
-
-		// draw the close hulls
-		int close_hulls_length = close_hulls.size();
-		for (int c = 0; c < close_hulls_length; c++) {
-			drawContours(close_hulls_image, close_hulls, c, Scalar(255, 0, 0), 2);
-		}
-
-		imshow("Close Hulls", close_hulls_image);
-
-		// // todo change variables after close_hulls
-		// // Check if region is white-ish
-		// vector<vector<Point>> potential_pedestrian_crossings(0);
-		// Mat potential_image = original_image.clone();
-		// int hull_filtered_length = hulls_filtered.size();
-		// for (int c = 0; c < hull_filtered_length; c++) {
-		// 	// get the average colour of the region
-		// 	Mat mask = Mat::zeros(original_image.size(), CV_8UC1);
-		// 	fillConvexPoly(mask, hulls_filtered[c], Scalar(255));
-		// 	Scalar meanColor = mean(original_image, mask);
-
-		// 	// compare it with white
-		// 	Scalar white = Scalar(255, 255, 255);
-		// 	float color_dist = color_distance(white, meanColor);
-		// 	if (color_dist <= COLOR_DISTANCE_THRESHOLD) {
-		// 		potential_pedestrian_crossings.push_back(hulls_filtered[c]);
-		// 		drawContours(potential_image, hulls_filtered, c, Scalar(255, 0, 0), 2);
-		// 	}
-		// }
 		
-		// imshow("Potential Crossings", potential_image);
+		Mat output_6 = JoinImagesHorizontally(output_5, "", white_regions_image, "White regions");
+		imshow("Output 3", output_6);
 
 		// go to next image
 		char c = cv::waitKey();
