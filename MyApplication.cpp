@@ -65,8 +65,8 @@ void MyApplication() {
 	const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
 	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
 	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
-	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;
-	const float MAX_HULL_DISTANCE_THRESHOLD = 500.0;
+	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;  // tested for optimal value
+	const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 
 	// 	get the image
