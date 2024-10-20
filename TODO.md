@@ -16,12 +16,13 @@
 - [x] filter by rectangularity of hulls (`min_bound_rect_area/object_area`)
 - [x] overlay hulls on real image, check for white-ish color
 - [x] fix hulls being different shape on filtered
-- [ ] filter isolated hulls
-- [ ] deal with hulls that strongly overlap
+- [x] filter isolated hulls
+- [x] deal with hulls that overlap
 
 ## Other
 
-- [x] change c iter variable to i\
+- [x] change c iter variable to i
+- [ ] instead of picking the previous hull when there's overlap, choose the region that is whiter
 - [ ] hough transform **results aren't very convincing**
 - [ ] change naming to lowerCamelCase
 - [ ] make consts more forgiving/looser? don't want to overfit/over-rely on 10 training images

@@ -16,6 +16,10 @@ int pedestrian_crossing_ground_truth[][9] = {
 	{ 18,0,122,503,117,0,169,503,176}
 };
 
+const Scalar WHITE = Scalar(255, 255, 255);
+const Scalar BLUE = Scalar(255, 0, 0);
+const Scalar GREEN  = Scalar(0, 255, 0);
+
 Mat get_ground_truth(int image_index, Mat original_image) {
 	Mat ground_truth_image = original_image.clone();
 	Point * points = new Point[4];
@@ -27,15 +31,15 @@ Mat get_ground_truth(int image_index, Mat original_image) {
 	}
 
 	// Draw lines
-	cv::line(ground_truth_image, points[0], points[1], Scalar(0, 255, 0), 2);
-	cv::line(ground_truth_image, points[0], points[2], Scalar(0, 255, 0), 2);
-	cv::line(ground_truth_image, points[1], points[3], Scalar(0, 255, 0), 2);
-	cv::line(ground_truth_image, points[2], points[3], Scalar(0, 255, 0), 2);
+	cv::line(ground_truth_image, points[0], points[1], GREEN, 2);
+	cv::line(ground_truth_image, points[0], points[2], GREEN, 2);
+	cv::line(ground_truth_image, points[1], points[3], GREEN, 2);
+	cv::line(ground_truth_image, points[2], points[3], GREEN, 2);
 
 	return ground_truth_image;
 }
 
-float color_distance(const Scalar& s1, const Scalar& s2) {
+float get_color_distance(const Scalar& s1, const Scalar& s2) {
     float dist = 0;
 
     for (int i = 0; i < 3; ++i) {
@@ -62,7 +66,7 @@ void MyApplication() {
 	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
 	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
 	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;
-	const float MAX_HULL_DISTANCE_THRESHOLD = 2000.0;
+	const float MAX_HULL_DISTANCE_THRESHOLD = 500.0;
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 
 	// 	get the image
@@ -156,8 +160,8 @@ void MyApplication() {
 					// filter by rectangularity
 					if (rectangularity >= RECTANGULARITY_THRESHOLD) {
 						// Draw the convex hull on 2 different images
-						drawContours(hull_image, hulls_unfiltered, i, Scalar(255, 0, 0));
-						drawContours(overlay_image, hulls_unfiltered, i, Scalar(255, 0, 0), 2);
+						drawContours(hull_image, hulls_unfiltered, i, BLUE);
+						drawContours(overlay_image, hulls_unfiltered, i, BLUE, 2);
 						// add to filtered hull index list
 						hulls_filtered_indexes.push_back(i);
 					}
@@ -181,59 +185,66 @@ void MyApplication() {
 			Scalar meanColor = mean(original_image, mask);
 
 			// compare it with white
-			Scalar white = Scalar(255, 255, 255);
-			float color_dist = color_distance(white, meanColor);
+			float color_dist = get_color_distance(WHITE, meanColor);
 			if (color_dist <= COLOR_DISTANCE_THRESHOLD) {
 				white_regions_indexes.push_back(hulls_filtered_indexes[i]);
-				drawContours(white_regions_image, hulls_unfiltered, hulls_filtered_indexes[i], Scalar(255, 0, 0), 2);
+				drawContours(white_regions_image, hulls_unfiltered, hulls_filtered_indexes[i], BLUE, 2);
 			}
 		}
 		
 		Mat output_6 = JoinImagesHorizontally(output_5, "", white_regions_image, "White regions");
 		imshow("Output 3", output_6);
 
-		// GETTING CENTER POINTS WORKS
-		// Filter isolated contours
-		vector<int> close_hulls_indexes(0);
+		// Filter isolated hulls
 		vector<Point> hull_centers(0);
+		vector<int> non_overlapping_hulls(0);
 		Mat close_image = original_image.clone();
 		int white_regions_indexes_length = white_regions_indexes.size();
+		int prev_x = -1.0;
+		int prev_y = -1.0;
 		// get center point of each hull
 		for (int i = 0; i < white_regions_indexes_length; i++) {
 			Moments m = moments(hulls_unfiltered[white_regions_indexes[i]]);
+			int center_x = m.m10 / m.m00;
+			int center_y = m.m01 / m.m00;
 
-			if (m.m00 != 0) {
-				int center_x = m.m10 / m.m00;
-            	int center_y = m.m01 / m.m00;
+			// if it's the first hull we spot
+			if (prev_x == -1.0 && prev_y == -1.0) {
 				hull_centers.push_back(Point(center_x, center_y));
-				circle(close_image, Point(center_x, center_y), 5, Scalar(255), -1);
+				non_overlapping_hulls.push_back(white_regions_indexes[i]);
+				prev_x = center_x;
+				prev_y = center_y;
+			}
+			// else, check if the current hull isn't overlapping with the previous one
+			else if (norm(Point(center_x, center_y) - Point(prev_x, prev_y)) >= MIN_HULL_DISTANCE_THRESHOLD) {
+				hull_centers.push_back(Point(center_x, center_y));
+				non_overlapping_hulls.push_back(white_regions_indexes[i]);
+				prev_x = center_x;
+				prev_y = center_y;
 			}
 		}
 
-		// WHERE I LEFT OFF:
-		// White regions works really well, filtering isolated contours is really confusing and weird results.
-		// check this code???
 		// for each hull, calculate its distance to other hulls
-		for (int i = 0; i < white_regions_indexes_length; i++) {
-			for (int j = 0; j < white_regions_indexes_length && j != i; j++) {
-				float dist = norm(hull_centers[i] - hull_centers[j]);
-				cout << "dist: " << dist << "\n";
-				if (dist > MIN_HULL_DISTANCE_THRESHOLD && dist <= MAX_HULL_DISTANCE_THRESHOLD) {
-					close_hulls_indexes.push_back(white_regions_indexes[i]);
-					j = white_regions_indexes_length; // end inner for loop
-					cout << "end\n";
-				} else {
-					cout << "oops\n";
+		vector<int> close_hulls_indexes(0);
+		int non_overlapping_hulls_length = non_overlapping_hulls.size();
+		for (int i = 0; i < non_overlapping_hulls_length; i++) {
+			for (int j = 0; j < non_overlapping_hulls_length; j++) {
+				if (j != i) {
+					float dist = norm(hull_centers[i] - hull_centers[j]);
+					// if there is a close hull
+					if (dist <= MAX_HULL_DISTANCE_THRESHOLD) {
+						close_hulls_indexes.push_back(non_overlapping_hulls[i]);
+						j = non_overlapping_hulls_length; // end inner for loop
+					}
 				}
 			}
 		}
 
-		// // draw the close hulls
-		// int close_hulls_indexes_length = close_hulls_indexes.size();
-		// for (int i = 0; i < close_hulls_indexes_length; i++) {
-		// 	drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], Scalar(255, 0, 0), 2);
-		// }
-		// cout << close_hulls_indexes_length << " close hulls\n";
+		// draw the close hulls
+		int close_hulls_indexes_length = close_hulls_indexes.size();
+		for (int i = 0; i < close_hulls_indexes_length; i++) {
+			drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], BLUE, 2);
+		}
 
 		imshow("Close Contours", close_image);
 
