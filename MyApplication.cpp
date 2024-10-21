@@ -281,15 +281,15 @@ void MyApplication() {
 			potential_crossings_centers.push_back(Point(center_x, center_y));
 		}
 
-		// Find the objects with the longest linear sequence
+		// Find the longest linear sequence amongst the potential pedestrian crossings
 		int maxCount = 2;
 		float minAngleSum = 181.0;
-		vector<Point> max_potential_crossings(0);
+		vector<int> max_potential_crossings(0);
 		for (int i = 0; i < close_hulls_indexes_length - 2; i++) {
 			for (int j = i+1; j < close_hulls_indexes_length - 1; j++) {
 				int count = 2;
 				float angleSum = 0.0;
-				vector<Point> potential_crossings = {potential_crossings_centers[i], potential_crossings_centers[j]};
+				vector<int> potential_crossings = {close_hulls_indexes[i], close_hulls_indexes[j]};
 
 				for (int k = j+1; k < close_hulls_indexes_length; k++) {
 					float angle = angleBetweenLines(potential_crossings_centers[i], potential_crossings_centers[j],
@@ -301,7 +301,7 @@ void MyApplication() {
 					if (angle <= LINE_DEGREES_THRESHOLD) {
 						count++;
 						angleSum += angle;
-						potential_crossings.push_back(potential_crossings_centers[k]);
+						potential_crossings.push_back(close_hulls_indexes[k]);
 					}
 				}
 
@@ -322,18 +322,17 @@ void MyApplication() {
 					if (minAngleSum > angleSum) {
 						minAngleSum = angleSum;
 						max_potential_crossings = potential_crossings;
-						cout << "found straighter\n";
 					}
 				}
 			}
 		}
 
 		// draw the potential pedestrian crossings
-		int max_potential_crossing_center_length = max_potential_crossings.size();
-		cout << max_potential_crossing_center_length << " size \n";
+		int max_potential_crossing_length = max_potential_crossings.size();
+		cout << max_potential_crossing_length << " size \n";
 		Mat output = original_image.clone();
-		for (int i = 0; i < max_potential_crossing_center_length; i++) {
-			circle(output, max_potential_crossings[i], 5, Scalar(0, 255, 0), -1);
+		for (int i = 0; i < max_potential_crossing_length; i++) {
+			drawContours(output, hulls_unfiltered, max_potential_crossings[i], GREEN, 2);
 		}
 
 		imshow("Output", output);
@@ -347,7 +346,7 @@ void MyApplication() {
 		// imshow("Hough Transform", hough_lines_image);
 
 		// go to next image
-		char c = waitKey();
+		waitKey();
 		destroyAllWindows();
 	}
 }
