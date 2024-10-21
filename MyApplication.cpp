@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include <list>
 
 // Ground truth for pedestrian crossings.  Each row contains
 // 1. the image number (PC?.jpg)
@@ -31,10 +32,10 @@ Mat get_ground_truth(int image_index, Mat original_image) {
 	}
 
 	// Draw lines
-	cv::line(ground_truth_image, points[0], points[1], GREEN, 2);
-	cv::line(ground_truth_image, points[0], points[2], GREEN, 2);
-	cv::line(ground_truth_image, points[1], points[3], GREEN, 2);
-	cv::line(ground_truth_image, points[2], points[3], GREEN, 2);
+	line(ground_truth_image, points[0], points[1], GREEN, 2);
+	line(ground_truth_image, points[0], points[2], GREEN, 2);
+	line(ground_truth_image, points[1], points[3], GREEN, 2);
+	line(ground_truth_image, points[2], points[3], GREEN, 2);
 
 	return ground_truth_image;
 }
@@ -49,13 +50,37 @@ float get_color_distance(const Scalar& s1, const Scalar& s2) {
     return sqrt(dist);
 }
 
+double angleBetweenLines(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
+    Point2f v1 = p2 - p1;
+    Point2f v2 = p4 - p3;
+    
+    double dotProduct = v1.x * v2.x + v1.y * v2.y;
+    double magV1 = sqrt(v1.x * v1.x + v1.y * v1.y);
+    double magV2 = sqrt(v2.x * v2.x + v2.y * v2.y);
+    double cosTheta = dotProduct / (magV1 * magV2);
+    
+    // avoid floating-point precision errors
+    if (cosTheta > 1.0) cosTheta = 1.0;
+    if (cosTheta < -1.0) cosTheta = -1.0;
+    
+    // Calculate the angle in radians and then convert to degrees
+    double angleInRadians = acos(cosTheta);
+    double angleInDegrees = angleInRadians * 180.0 / CV_PI;
+    
+    return angleInDegrees;
+}
+
+bool compareByX(Point p1, Point p2) {
+    return p1.x < p2.x;
+}
+
 void MyApplication() {
 	
 	// TODO make these safer and increase boundaries?
 	const int NUM_MEDIAN_BLUR_ITERATIONS = 1;  // tested for optimal value
 	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value
-	const int BINARY_THRESHOLD_VALUE = 100;
-	const int BINARY_MAX_THRESHOLD = 255;
+	const int BINARY_THRESHOLD_VALUE = 100;  // I don't think this matters? because we are using otsu anyway TODO check anyway
+	const int BINARY_MAX_THRESHOLD = 255;  // I don't think this matters? because we are using otsu anyway TODO check anyway
 	const int CLOSING_KERNEL_SIZE = 2;  // tested for optimal value
 	const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
 	const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
@@ -68,6 +93,7 @@ void MyApplication() {
 	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;  // tested for optimal value
 	const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
+	const float LINE_DEGREES_THRESHOLD = 4.0;  // 4.0 is convservative, 3.0 is well-tested. could go conservative on this one because chances are you might miss just 1 crossing but won't affect your result
 
 	// 	get the image
 	char* file_location = "../media/";
@@ -135,7 +161,6 @@ void MyApplication() {
 		vector<vector<Point>> hulls_unfiltered(contours_length);
 		vector<int> hulls_filtered_indexes(0);
 		Mat contours_image = Mat::zeros(closing_image.size(), CV_8UC3);
-		Mat hull_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		Mat min_bound_rectangle_image = Mat::zeros(closing_image.size(), CV_8UC3);
 		vector<RotatedRect> min_bounding_rectangle(contours_length);
 
@@ -160,7 +185,6 @@ void MyApplication() {
 					// filter by rectangularity
 					if (rectangularity >= RECTANGULARITY_THRESHOLD) {
 						// Draw the convex hull on 2 different images
-						drawContours(hull_image, hulls_unfiltered, i, BLUE);
 						drawContours(overlay_image, hulls_unfiltered, i, BLUE, 2);
 						// add to filtered hull index list
 						hulls_filtered_indexes.push_back(i);
@@ -171,8 +195,6 @@ void MyApplication() {
 
 		Mat output_4 = JoinImagesHorizontally(output_3, "", contours_image, "CCA");
 		imshow("Output 2", output_4);
-
-		Mat output_5 = JoinImagesHorizontally(hull_image, "Convex Hulls", overlay_image, "Overlayed Convex Hulls");
 
 		// Check if region is white-ish
 		vector<int> white_regions_indexes(0);
@@ -191,9 +213,7 @@ void MyApplication() {
 				drawContours(white_regions_image, hulls_unfiltered, hulls_filtered_indexes[i], BLUE, 2);
 			}
 		}
-		
-		Mat output_6 = JoinImagesHorizontally(output_5, "", white_regions_image, "White regions");
-		imshow("Output 3", output_6);
+		Mat output_5 = JoinImagesHorizontally(overlay_image, "Convex Hulls", white_regions_image, "White regions");
 
 		// Filter isolated hulls
 		vector<Point> hull_centers(0);
@@ -241,15 +261,75 @@ void MyApplication() {
 		}
 
 		// draw the close hulls
+		Mat potential_crossings_image= Mat::zeros(closing_image.size(), CV_8UC3);
 		int close_hulls_indexes_length = close_hulls_indexes.size();
 		for (int i = 0; i < close_hulls_indexes_length; i++) {
 			drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], BLUE, 2);
+			drawContours(potential_crossings_image, hulls_unfiltered, close_hulls_indexes[i], BLUE, 2);
 		}
 
-		imshow("Close Contours", close_image);
+		Mat output_6 = JoinImagesHorizontally(output_5, "", close_image, "Close Hulls");
+		imshow("Output 3", output_6);
+
+		// get center point of each potential crossing
+		vector<Point> potential_crossings_centers;
+		for (int i = 0; i < close_hulls_indexes_length; i++) {
+			Moments m = moments(hulls_unfiltered[close_hulls_indexes[i]]);
+			int center_x = m.m10 / m.m00;
+			int center_y = m.m01 / m.m00;
+			potential_crossings_centers.push_back(Point(center_x, center_y));
+		}
+
+		// TODO do we need to sort?
+		// sort objects by x co-ordinate
+		std::sort(potential_crossings_centers.begin(), potential_crossings_centers.end(), compareByX);
+
+		// Find the objects with the longest linear sequence
+		int maxCount = 2;
+		vector<Point> max_potential_crossings(0);
+		for (int i = 0; i < close_hulls_indexes_length - 2; i++) {
+			for (int j = i+1; j < close_hulls_indexes_length - 1; j++) {
+				int count = 2;
+				// TODO instead of storing center points, should store convex hulls
+				vector<Point> potential_crossings = {potential_crossings_centers[i], potential_crossings_centers[j]};
+
+				for (int k = j+1; k < close_hulls_indexes_length; k++) {
+					float angle = angleBetweenLines(potential_crossings_centers[i], potential_crossings_centers[j],
+											potential_crossings_centers[i], potential_crossings_centers[k]);
+					if (angle <= LINE_DEGREES_THRESHOLD) {
+						count++;
+						potential_crossings.push_back(potential_crossings_centers[k]);
+					}
+				}
+
+				if (count > maxCount) {
+					maxCount = count;
+					max_potential_crossings = potential_crossings;
+				}
+			}
+		}
+
+		// draw the potential pedestrian crossings
+		int max_potential_crossing_center_length = max_potential_crossings.size();
+		cout << max_potential_crossing_center_length << " size \n";
+		Mat output = original_image.clone();
+		for (int i = 0; i < max_potential_crossing_center_length; i++) {
+			circle(output, max_potential_crossings[i], 5, Scalar(0, 255, 0), -1);
+			// TODO draw convex hull
+		}
+
+		imshow("Output", output);
+
+		// // Hough Transform
+		// vector<Vec2f> hough_lines;
+		// cvtColor(potential_crossings_image, potential_crossings_image, COLOR_BGR2GRAY);
+		// HoughLines(potential_crossings_image, hough_lines, 1, PI/200.0, 100);
+		// Mat hough_lines_image = potential_crossings_image.clone();
+		// DrawLines(hough_lines_image, hough_lines);
+		// imshow("Hough Transform", hough_lines_image);
 
 		// go to next image
-		char c = cv::waitKey();
-		cv::destroyAllWindows();		
+		char c = waitKey();
+		destroyAllWindows();
 	}
 }
