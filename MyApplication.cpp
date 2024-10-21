@@ -70,11 +70,6 @@ double angleBetweenLines(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
     return angleInDegrees;
 }
 
-// TODO - if I don't need to sort, then delete this
-bool compareByX(Point p1, Point p2) {
-    return p1.x < p2.x;
-}
-
 void MyApplication() {
 	
 	// TODO make these safer and increase boundaries?
