@@ -287,11 +287,7 @@ void MyApplication() {
 		int maxCount = 2;
 		vector<Point> max_potential_crossings(0);
 		for (int i = 0; i < close_hulls_indexes_length - 2; i++) {
-			Mat temp_img = original_image.clone(); // temp
 			for (int j = i+1; j < close_hulls_indexes_length - 1; j++) {
-				temp_img = original_image.clone(); // temp
-				circle(temp_img, potential_crossings_centers[i], 4, Scalar(255, 0, 0), -1); // temp
-				circle(temp_img, potential_crossings_centers[j], 4, Scalar(255, 0, 0), -1); // temp
 				int count = 2;
 				vector<Point> potential_crossings = {potential_crossings_centers[i], potential_crossings_centers[j]};
 
@@ -301,22 +297,11 @@ void MyApplication() {
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
-					circle(temp_img, potential_crossings_centers[k], 4, Scalar(0, 0, 255), -1); // temp
-					////////////////// temp
-					waitKey();
-					imshow("temp", temp_img);
 					cout << "angle: " << angle << "\n"; // todo temp
-					///////////////////
 					if (angle <= LINE_DEGREES_THRESHOLD) {
 						count++;
 						potential_crossings.push_back(potential_crossings_centers[k]);
-						circle(temp_img, potential_crossings_centers[k], 4, Scalar(255, 0, 0), -1); // temp
 					}
-
-					////////////////// temp
-					waitKey();
-					imshow("temp", temp_img);
-					///////////////////
 				}
 
 				if (count > maxCount) {
