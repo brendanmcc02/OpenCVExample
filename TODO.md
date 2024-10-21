@@ -18,8 +18,9 @@
 - [x] fix hulls being different shape on filtered
 - [x] filter isolated hulls
 - [x] deal with hulls that overlap
-- [ ] longest linear sequence **still funky?**
-- [ ] for linear sequences that tie for max, pick the straightest one
+- [x] longest linear sequence
+- [x] for linear sequences that tie for max, pick the straightest one
+- [ ] error handling for empty/not found linear subsequences, what if there's only 3 and they don't align
 
 ## Other
 

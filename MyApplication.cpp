@@ -70,6 +70,7 @@ double angleBetweenLines(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
     return angleInDegrees;
 }
 
+// TODO - if I don't need to sort, then delete this
 bool compareByX(Point p1, Point p2) {
     return p1.x < p2.x;
 }
@@ -93,7 +94,7 @@ void MyApplication() {
 	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;  // tested for optimal value
 	const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
-	const float LINE_DEGREES_THRESHOLD = 4.0;  // 4 is relatively conservative, but could even go for 5.0 to be looser
+	const float LINE_DEGREES_THRESHOLD = 5.0;  // 5 should be loose, 4 is a bit risky/conservative
 
 	// 	get the image
 	char* file_location = "../media/";
@@ -282,10 +283,12 @@ void MyApplication() {
 
 		// Find the objects with the longest linear sequence
 		int maxCount = 2;
+		float minAngleSum = 181.0;
 		vector<Point> max_potential_crossings(0);
 		for (int i = 0; i < close_hulls_indexes_length - 2; i++) {
 			for (int j = i+1; j < close_hulls_indexes_length - 1; j++) {
 				int count = 2;
+				float angleSum = 0.0;
 				vector<Point> potential_crossings = {potential_crossings_centers[i], potential_crossings_centers[j]};
 
 				for (int k = j+1; k < close_hulls_indexes_length; k++) {
@@ -297,19 +300,30 @@ void MyApplication() {
 					cout << "angle: " << angle << "\n"; // todo temp
 					if (angle <= LINE_DEGREES_THRESHOLD) {
 						count++;
+						angleSum += angle;
 						potential_crossings.push_back(potential_crossings_centers[k]);
 					}
 				}
 
 				if (count > maxCount) {
 					maxCount = count;
+					minAngleSum = angleSum;
 					max_potential_crossings = potential_crossings;
-					// if we've found a sequence that's already the max possible length, end early
+					// if we've found a sequence that's already the max possible length, end the loop early
 					if (maxCount == close_hulls_indexes_length) {
 						i = close_hulls_indexes_length;
 						j = close_hulls_indexes_length;
 					}
-					cout << "max: " << maxCount << "\n"; // temp
+					cout << "found max: " << maxCount << "\n"; // temp
+				}
+				// if there's a tie for the longest sequence
+				else if (count == maxCount) {
+					// choose the sequence that is 'straighter'
+					if (minAngleSum > angleSum) {
+						minAngleSum = angleSum;
+						max_potential_crossings = potential_crossings;
+						cout << "found straighter\n";
+					}
 				}
 			}
 		}
