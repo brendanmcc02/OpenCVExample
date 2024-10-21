@@ -280,9 +280,6 @@ void MyApplication() {
 			potential_crossings_centers.push_back(Point(center_x, center_y));
 		}
 
-		// sort objects by x co-ordinate
-		// std::sort(potential_crossings_centers.begin(), potential_crossings_centers.end(), compareByX);
-
 		// Find the objects with the longest linear sequence
 		int maxCount = 2;
 		vector<Point> max_potential_crossings(0);
