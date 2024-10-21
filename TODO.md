@@ -18,6 +18,8 @@
 - [x] fix hulls being different shape on filtered
 - [x] filter isolated hulls
 - [x] deal with hulls that overlap
+- [ ] longest linear sequence **still funky?**
+- [ ] for linear sequences that tie for max, pick the straightest one
 
 ## Other
 
@@ -28,3 +30,4 @@
 - [ ] make consts more forgiving/looser? don't want to overfit/over-rely on 10 training images
 - [ ] ~~try gaussian smoothing instead of median? **don't think it would be good because median smoothing preserves edges~~
 - [ ] ~~filter by hull edge size (or ratio of width-height)~~ don't think it's important as we already filter by area
+- [ ] make the file ken/windows friendly

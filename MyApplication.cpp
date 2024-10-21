@@ -93,7 +93,7 @@ void MyApplication() {
 	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;  // tested for optimal value
 	const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
-	const float LINE_DEGREES_THRESHOLD = 4.0;  // 4.0 is convservative, 3.0 is well-tested. could go conservative on this one because chances are you might miss just 1 crossing but won't affect your result
+	const float LINE_DEGREES_THRESHOLD = 4.0;  // 4 is relatively conservative, but could even go for 5.0 to be looser
 
 	// 	get the image
 	char* file_location = "../media/";
@@ -280,31 +280,54 @@ void MyApplication() {
 			potential_crossings_centers.push_back(Point(center_x, center_y));
 		}
 
-		// TODO do we need to sort?
 		// sort objects by x co-ordinate
-		std::sort(potential_crossings_centers.begin(), potential_crossings_centers.end(), compareByX);
+		// std::sort(potential_crossings_centers.begin(), potential_crossings_centers.end(), compareByX);
 
 		// Find the objects with the longest linear sequence
 		int maxCount = 2;
 		vector<Point> max_potential_crossings(0);
 		for (int i = 0; i < close_hulls_indexes_length - 2; i++) {
+			Mat temp_img = original_image.clone(); // temp
 			for (int j = i+1; j < close_hulls_indexes_length - 1; j++) {
+				temp_img = original_image.clone(); // temp
+				circle(temp_img, potential_crossings_centers[i], 4, Scalar(255, 0, 0), -1); // temp
+				circle(temp_img, potential_crossings_centers[j], 4, Scalar(255, 0, 0), -1); // temp
 				int count = 2;
-				// TODO instead of storing center points, should store convex hulls
 				vector<Point> potential_crossings = {potential_crossings_centers[i], potential_crossings_centers[j]};
 
 				for (int k = j+1; k < close_hulls_indexes_length; k++) {
 					float angle = angleBetweenLines(potential_crossings_centers[i], potential_crossings_centers[j],
 											potential_crossings_centers[i], potential_crossings_centers[k]);
+					if (angle > 90.0) {
+						angle = 180.0 - angle;
+					}
+					circle(temp_img, potential_crossings_centers[k], 4, Scalar(0, 0, 255), -1); // temp
+					////////////////// temp
+					waitKey();
+					imshow("temp", temp_img);
+					cout << "angle: " << angle << "\n"; // todo temp
+					///////////////////
 					if (angle <= LINE_DEGREES_THRESHOLD) {
 						count++;
 						potential_crossings.push_back(potential_crossings_centers[k]);
+						circle(temp_img, potential_crossings_centers[k], 4, Scalar(255, 0, 0), -1); // temp
 					}
+
+					////////////////// temp
+					waitKey();
+					imshow("temp", temp_img);
+					///////////////////
 				}
 
 				if (count > maxCount) {
 					maxCount = count;
 					max_potential_crossings = potential_crossings;
+					// if we've found a sequence that's already the max possible length, end early
+					if (maxCount == close_hulls_indexes_length) {
+						i = close_hulls_indexes_length;
+						j = close_hulls_indexes_length;
+					}
+					cout << "max: " << maxCount << "\n"; // temp
 				}
 			}
 		}
@@ -315,7 +338,6 @@ void MyApplication() {
 		Mat output = original_image.clone();
 		for (int i = 0; i < max_potential_crossing_center_length; i++) {
 			circle(output, max_potential_crossings[i], 5, Scalar(0, 255, 0), -1);
-			// TODO draw convex hull
 		}
 
 		imshow("Output", output);
