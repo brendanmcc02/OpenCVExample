@@ -95,6 +95,7 @@ void MyApplication() {
 	const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
 	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 	const float LINE_DEGREES_THRESHOLD = 5.0;  // 5 should be loose, 4 is a bit risky/conservative
+	const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;
 
 	// 	get the image
 	char* file_location = "../media/";
@@ -106,6 +107,9 @@ void MyApplication() {
 		file.append(filename);
 		Mat original_image;
 		original_image = imread(file, -1);
+		const Size original_image_size = original_image.size();
+		const Point HORIZONTAL_LINE_1 = Point(0.0, original_image_size.height/2.0);
+		const Point HORIZONTAL_LINE_2 = Point(original_image_size.width, original_image_size.height/2.0);
 		Mat ground_truth = get_ground_truth(image_index, original_image);
 
 		// Iterative Median smoothing
@@ -203,7 +207,7 @@ void MyApplication() {
 		int hulls_filtered_indexes_length = hulls_filtered_indexes.size();
 		for (int i = 0; i < hulls_filtered_indexes_length; i++) {
 			// get the average colour of the region
-			Mat mask = Mat::zeros(original_image.size(), CV_8UC1);
+			Mat mask = Mat::zeros(original_image_size, CV_8UC1);
 			fillConvexPoly(mask, hulls_unfiltered[hulls_filtered_indexes[i]], Scalar(255));
 			Scalar meanColor = mean(original_image, mask);
 
@@ -293,7 +297,7 @@ void MyApplication() {
 
 				for (int k = j+1; k < close_hulls_indexes_length; k++) {
 					float angle = angleBetweenLines(potential_crossings_centers[i], potential_crossings_centers[j],
-											potential_crossings_centers[i], potential_crossings_centers[k]);
+													potential_crossings_centers[i], potential_crossings_centers[k]);
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
@@ -305,24 +309,38 @@ void MyApplication() {
 					}
 				}
 
-				if (count > maxCount) {
-					maxCount = count;
-					minAngleSum = angleSum;
-					max_potential_crossings = potential_crossings;
-					// if we've found a sequence that's already the max possible length, end the loop early
-					if (maxCount == close_hulls_indexes_length) {
-						i = close_hulls_indexes_length;
-						j = close_hulls_indexes_length;
-					}
-					cout << "found max: " << maxCount << "\n"; // temp
+				// check for 'horizontalness'
+				float horizontalAngle = angleBetweenLines(potential_crossings_centers[i], potential_crossings_centers[j], 
+														  HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
+				if (horizontalAngle > 90.0) {
+						horizontalAngle = 180.0 - horizontalAngle;
 				}
-				// if there's a tie for the longest sequence
-				else if (count == maxCount) {
-					// choose the sequence that is 'straighter'
-					if (minAngleSum > angleSum) {
+				cout << horizontalAngle << " horiz angle\n";
+				// if the sequence is 'horizontal'
+				if (horizontalAngle < HORIZONTAL_ANGLE_THRESHOLD) {
+					if (count > maxCount) {
+						maxCount = count;
 						minAngleSum = angleSum;
 						max_potential_crossings = potential_crossings;
+						// if we've found a sequence that's already the max possible length, end the loop early
+						if (maxCount == close_hulls_indexes_length) {
+							i = close_hulls_indexes_length;
+							j = close_hulls_indexes_length;
+						}
+						cout << "found max: " << maxCount << "\n"; // temp
 					}
+					// if there's a tie for the longest sequence
+					else if (count == maxCount) {
+						// choose the sequence that is 'straighter'
+						if (minAngleSum > angleSum) {
+							minAngleSum = angleSum;
+							max_potential_crossings = potential_crossings;
+						}
+					}
+				}
+				// the sequence it too 'vertical', likely it is not a pedestrian crossing and is something else
+				else {
+					cout << "not horizontal\n"; 
 				}
 			}
 		}

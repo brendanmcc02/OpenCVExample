@@ -20,7 +20,7 @@
 - [x] deal with hulls that overlap
 - [x] longest linear sequence
 - [x] for linear sequences that tie for max, pick the straightest one
-- [ ] bullet-proof against vertical crossings
+- [x] bullet-proof against vertical crossings
 - [ ] draw predicted box
 
 ## Other
