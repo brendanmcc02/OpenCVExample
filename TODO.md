@@ -21,11 +21,12 @@
 - [x] longest linear sequence
 - [x] for linear sequences that tie for max, pick the straightest one
 - [x] bullet-proof against vertical crossings
-- [ ] draw predicted box
+- [x] draw predicted box
 
 ## Other
 
 - [x] change c iter variable to i
+- [ ] make predicted box drawing better
 - [ ] error handling for empty/not found linear subsequences, what if there's only 3 and they don't align
 - [ ] instead of picking the previous hull when there's overlap, choose the region that is whiter
 - [ ] hough transform **results aren't very convincing**

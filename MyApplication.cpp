@@ -110,7 +110,7 @@ void MyApplication() {
 		const Size original_image_size = original_image.size();
 		const Point HORIZONTAL_LINE_1 = Point(0.0, original_image_size.height/2.0);
 		const Point HORIZONTAL_LINE_2 = Point(original_image_size.width, original_image_size.height/2.0);
-		Mat ground_truth = get_ground_truth(image_index, original_image);
+		Mat ground_truth_image = get_ground_truth(image_index, original_image);
 
 		// Iterative Median smoothing
 		Mat smoothed_image;
@@ -138,7 +138,7 @@ void MyApplication() {
 		Mat multispectral_edges;
 		merge(output_planes, multispectral_edges);
 		Mat output_2 = JoinImagesHorizontally(output_1, "", multispectral_edges, "Canny Edge Detection");
-		imshow("Output 1", output_2);
+		imshow("Stage 1", output_2);
 
 		// Otsu Thresholding
 		Mat grayscale_image, otsu_image, otsu_output;
@@ -199,7 +199,7 @@ void MyApplication() {
 		}
 
 		Mat output_4 = JoinImagesHorizontally(output_3, "", contours_image, "CCA");
-		imshow("Output 2", output_4);
+		imshow("Stage 2", output_4);
 
 		// Check if region is white-ish
 		vector<int> white_regions_indexes(0);
@@ -227,6 +227,7 @@ void MyApplication() {
 		int white_regions_indexes_length = white_regions_indexes.size();
 		int prev_x = -1.0;
 		int prev_y = -1.0;
+		
 		// get center point of each hull
 		for (int i = 0; i < white_regions_indexes_length; i++) {
 			Moments m = moments(hulls_unfiltered[white_regions_indexes[i]]);
@@ -274,7 +275,7 @@ void MyApplication() {
 		}
 
 		Mat output_6 = JoinImagesHorizontally(output_5, "", close_image, "Close Hulls");
-		imshow("Output 3", output_6);
+		imshow("Stage 3", output_6);
 
 		// get center point of each potential crossing
 		vector<Point> potential_crossings_centers;
@@ -301,7 +302,7 @@ void MyApplication() {
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
-					cout << "angle: " << angle << "\n"; // todo temp
+					
 					if (angle <= LINE_DEGREES_THRESHOLD) {
 						count++;
 						angleSum += angle;
@@ -315,7 +316,7 @@ void MyApplication() {
 				if (horizontalAngle > 90.0) {
 						horizontalAngle = 180.0 - horizontalAngle;
 				}
-				cout << horizontalAngle << " horiz angle\n";
+				
 				// if the sequence is 'horizontal'
 				if (horizontalAngle < HORIZONTAL_ANGLE_THRESHOLD) {
 					if (count > maxCount) {
@@ -327,7 +328,7 @@ void MyApplication() {
 							i = close_hulls_indexes_length;
 							j = close_hulls_indexes_length;
 						}
-						cout << "found max: " << maxCount << "\n"; // temp
+						
 					}
 					// if there's a tie for the longest sequence
 					else if (count == maxCount) {
@@ -338,30 +339,68 @@ void MyApplication() {
 						}
 					}
 				}
-				// the sequence it too 'vertical', likely it is not a pedestrian crossing and is something else
-				else {
-					cout << "not horizontal\n"; 
-				}
+				// // the linear sequence of objects is too 'vertical', likely it is not a pedestrian crossing and is something else
+				// else {
+				// 	cout << "not horizontal\n"; 
+				// }
 			}
 		}
 
 		// draw the potential pedestrian crossings
 		int max_potential_crossing_length = max_potential_crossings.size();
-		cout << max_potential_crossing_length << " size \n";
-		Mat output = original_image.clone();
+		Mat pedestrian_crossing_image = Mat::zeros(original_image_size, CV_8UC3);
 		for (int i = 0; i < max_potential_crossing_length; i++) {
-			drawContours(output, hulls_unfiltered, max_potential_crossings[i], GREEN, 2);
+			drawContours(pedestrian_crossing_image, hulls_unfiltered, max_potential_crossings[i], GREEN, 2);
 		}
 
-		imshow("Output", output);
+		imshow("Stage 4", pedestrian_crossing_image);
 
-		// // Hough Transform
-		// vector<Vec2f> hough_lines;
-		// cvtColor(potential_crossings_image, potential_crossings_image, COLOR_BGR2GRAY);
-		// HoughLines(potential_crossings_image, hough_lines, 1, PI/200.0, 100);
-		// Mat hough_lines_image = potential_crossings_image.clone();
-		// DrawLines(hough_lines_image, hough_lines);
-		// imshow("Hough Transform", hough_lines_image);
+		// find the min & max y-coordinate out of all the pedestrian crossings
+		int minY = original_image_size.height;
+		int minX = 0;
+		int maxY = 0;
+		int maxX = 0;
+		for (int i = 0; i < max_potential_crossing_length; i++) {
+			for (Point point : hulls_unfiltered[max_potential_crossings[i]]) {
+				
+				int y = point.y;
+				if (y < minY) {
+					minY = y;
+					minX = point.x;
+				}
+
+				if (y > maxY) {
+					maxY = y;
+					maxX = point.x;
+				}
+			}
+		}
+
+		// get the slope of the line going through the center of the pedestrian crossing
+		Moments m_1 = moments(hulls_unfiltered[max_potential_crossings[0]]);
+		int center_x_1 = m_1.m10 / m_1.m00;
+		int center_y_1 = m_1.m01 / m_1.m00;
+		Moments m_2 = moments(hulls_unfiltered[max_potential_crossings[1]]);
+		int center_x_2 = m_2.m10 / m_2.m00;
+		int center_y_2 = m_2.m01 / m_2.m00;
+		float slope = (float)(center_y_2 - center_y_1) / (float)(center_x_2 - center_x_1);
+
+		// draw the enclosing box
+		Mat predicted_image = original_image.clone();
+		int width = original_image_size.width - 1;
+		float intercept = maxY - (slope * maxX);
+		Point bottom_left = Point(0, intercept);
+		Point bottom_right = Point(width, (slope * width) + intercept);
+		intercept = minY - (slope * minX);
+		Point top_left = Point(0, intercept);
+		Point top_right = Point(width, (slope * width) + intercept);
+		line(predicted_image, bottom_left, bottom_right, BLUE, 2);
+		line(predicted_image, top_left, top_right, BLUE, 2);
+		line(predicted_image, top_left, bottom_left, BLUE, 2);
+		line(predicted_image, top_right, bottom_right, BLUE, 2);
+
+		Mat output = JoinImagesHorizontally(ground_truth_image, "Original", predicted_image, "Predicted");
+		imshow("Final Output", output);
 
 		// go to next image
 		waitKey();
