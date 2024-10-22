@@ -371,24 +371,33 @@ void MyApplication() {
 			}
 		}
 
-		// get the slope of the line going through the center of the pedestrian crossing
-		Moments m_1 = moments(hulls_unfiltered[max_potential_crossings[0]]);
-		int center_x_1 = m_1.m10 / m_1.m00;
-		int center_y_1 = m_1.m01 / m_1.m00;
-		Moments m_2 = moments(hulls_unfiltered[max_potential_crossings[1]]);
-		int center_x_2 = m_2.m10 / m_2.m00;
-		int center_y_2 = m_2.m01 / m_2.m00;
-		float slope = (float)(center_y_2 - center_y_1) / (float)(center_x_2 - center_x_1);
+		// get the average slope of the lines going through the centers of the pedestrian crossings
+		float slopeTotal = 0.0;
+		int slopeCount = 0;
+		for (int i = 0; i < max_potential_crossing_length - 1; i++) {
+			for (int j = i + 1; j < max_potential_crossing_length; j++) {
+				Moments m_1 = moments(hulls_unfiltered[max_potential_crossings[i]]);
+				int center_x_1 = m_1.m10 / m_1.m00;
+				int center_y_1 = m_1.m01 / m_1.m00;
+				Moments m_2 = moments(hulls_unfiltered[max_potential_crossings[j]]);
+				int center_x_2 = m_2.m10 / m_2.m00;
+				int center_y_2 = m_2.m01 / m_2.m00;
+				slopeTotal += ((float)(center_y_2 - center_y_1) / (float)(center_x_2 - center_x_1));
+				slopeCount++;
+			}
+		}
+
+		float meanSlope = slopeTotal / slopeCount;
 
 		// draw the enclosing box
 		Mat predicted_image = original_image.clone();
 		int width = original_image_size.width - 1;
-		float intercept = maxY - (slope * maxX);
+		float intercept = maxY - (meanSlope * maxX);
 		Point bottom_left = Point(0, intercept);
-		Point bottom_right = Point(width, (slope * width) + intercept);
-		intercept = minY - (slope * minX);
+		Point bottom_right = Point(width, (meanSlope * width) + intercept);
+		intercept = minY - (meanSlope * minX);
 		Point top_left = Point(0, intercept);
-		Point top_right = Point(width, (slope * width) + intercept);
+		Point top_right = Point(width, (meanSlope * width) + intercept);
 		line(predicted_image, bottom_left, bottom_right, BLUE, 2);
 		line(predicted_image, top_left, top_right, BLUE, 2);
 		line(predicted_image, top_left, bottom_left, BLUE, 2);

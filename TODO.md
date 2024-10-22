@@ -26,7 +26,7 @@
 ## Other
 
 - [x] change c iter variable to i
-- [ ] make predicted box drawing better
+
 - [ ] error handling for empty/not found linear subsequences, what if there's only 3 and they don't align
 - [ ] instead of picking the previous hull when there's overlap, choose the region that is whiter
 - [ ] hough transform **results aren't very convincing**
