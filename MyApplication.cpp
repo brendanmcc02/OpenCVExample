@@ -1,6 +1,7 @@
 #include "Utilities.h"
 #include <list>
-
+#define DEBUG false
+#define TEST false
 // Ground truth for pedestrian crossings.  Each row contains
 // 1. the image number (PC?.jpg)
 // 2. the coordinates of the line at the top of the pedestrian crossing (left column, left row, right column, right row)
@@ -26,16 +27,16 @@ const int CLOSING_KERNEL_SIZE = 2;  // tested for optimal value
 const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
 const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
 const int CONTOUR_SIZE_THRESHOLD = 90;  // tested for optimal value
-const int MIN_CONTOUR_AREA_THRESHOLD = 50;  // not super optimal, lots of trade-offs with 100 so I set to a safe 50 for now.
+const int MIN_CONTOUR_AREA_THRESHOLD = 50;  // 50 is pretty loose/safe
 const int MAX_CONTOUR_AREA_THRESHOLD = 3000;  // tested for optimal value
-const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
+const int MIN_HULL_AREA_THRESHOLD = 500;  // train: 400
 const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
-const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
-const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;  // tested for optimal value
-const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
-const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
-const float LINE_DEGREES_THRESHOLD = 5.0;  // 5 should be loose, 4 is a bit risky/conservative
-const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;  // relatively optimal
+const float RECTANGULARITY_THRESHOLD = 0.5;  // train: 0.6
+const float MIN_HULL_DISTANCE_THRESHOLD = 10.0;  // train: 5.0
+const float MAX_HULL_DISTANCE_THRESHOLD = 175.0;  // train: 150
+const float WHITE_COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
+const float LINE_DEGREES_THRESHOLD = 8.0;  // train: 5.0
+const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;  // tested for optimal value
 
 Mat getGroundTruth(int imageIndex, Mat originalImage) {
 	Mat groundTruthImage = originalImage.clone();
@@ -132,13 +133,18 @@ Mat closing(Mat image) {
 
 void MyApplication() {
 	// 	get the image
-	char* fileLocation = "../media/"; // 
-	// for (int imageIndex = 10; imageIndex <= 19; imageIndex++) {
+	char* fileLocation = "../media/";
+#if TEST
 	for (int imageIndex = 1; imageIndex <= 6; imageIndex++) {
 		// Get the original image
 		char filename[200];
-		// sprintf(filename, "PC%d.jpg", imageIndex);
 		sprintf(filename, "test-%d.jpg", imageIndex);
+#else
+	for (int imageIndex = 10; imageIndex <= 19; imageIndex++) {
+		// Get the original image
+		char filename[200];
+		sprintf(filename, "PC%d.jpg", imageIndex);
+#endif
 		string file(fileLocation);
 		file.append(filename);
 		Mat originalImage;
@@ -187,7 +193,7 @@ void MyApplication() {
 			if (contours[i].size() >= CONTOUR_SIZE_THRESHOLD && contour_area >= MIN_CONTOUR_AREA_THRESHOLD
 				&& contour_area <= MAX_CONTOUR_AREA_THRESHOLD) {
 				// CCA
-				drawContours(contoursImage, contours, i, Scalar(255, 255, 255), FILLED, 8, hierarchy);
+				drawContours(contoursImage, contours, i, WHITE, FILLED, 8, hierarchy);
 
 				// draw convex hulls around edges
 				convexHull(contours[i], convexHullsUnfiltered[i]);
@@ -225,7 +231,7 @@ void MyApplication() {
 
 			// compare it with white
 			float colorDist = getColorDistance(WHITE, meanColor);
-			if (colorDist <= COLOR_DISTANCE_THRESHOLD) {
+			if (colorDist <= WHITE_COLOR_DISTANCE_THRESHOLD) {
 				whiteRegions.push_back(convexHullsFiltered[i]);
 				drawContours(whiteRegionsImage, convexHullsUnfiltered, convexHullsFiltered[i], BLUE, 2);
 			}
@@ -301,9 +307,17 @@ void MyApplication() {
 		// Find the longest linear sequence amongst the potential pedestrian crossings
 		int maxCount = 2;
 		float minAngleSum = 181.0;
+#if DEBUG
+		Mat debugImage;
+#endif
 		vector<int> maxPotentialCrossings(0);
 		for (int i = 0; i < closeConvexHullsLength - 2; i++) {
 			for (int j = i+1; j < closeConvexHullsLength - 1; j++) {
+#if DEBUG
+				debugImage = originalImage.clone();
+				circle(debugImage, potentialCrossingsCenters[i], 3, BLUE, -1);
+				circle(debugImage, potentialCrossingsCenters[j], 3, BLUE, -1);
+#endif
 				int count = 2;
 				float angleSum = 0.0;
 				vector<int> potentialCrossings = {closeConvexHulls[i], closeConvexHulls[j]};
@@ -314,7 +328,11 @@ void MyApplication() {
 					// calculate the angle between a horizontal line, and a line going through the centers of the crossing
 					float horizontalAngle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[k], 
 														  HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
-					
+#if DEBUG
+					waitKey();
+					circle(debugImage, potentialCrossingsCenters[k], 3, Scalar(0, 0, 255), -1);
+					imshow("Debug", debugImage);
+#endif
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
@@ -324,6 +342,11 @@ void MyApplication() {
 					}
 
 					if (angle <= LINE_DEGREES_THRESHOLD && horizontalAngle <= HORIZONTAL_ANGLE_THRESHOLD) {
+#if DEBUG
+						waitKey();
+						circle(debugImage, potentialCrossingsCenters[k], 3, BLUE, -1);
+						imshow("Debug", debugImage);
+#endif
 						count++;
 						angleSum += angle;
 						potentialCrossings.push_back(closeConvexHulls[k]);
