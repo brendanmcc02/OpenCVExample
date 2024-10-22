@@ -27,8 +27,8 @@
 
 - [x] change c iter variable to i
 - [x] change naming to lowerCamelCase
-- [ ] put things in functions?
-- [ ] error handling for empty/not found linear subsequences, what if there's only 3 and they don't align
+- [x] error handling for empty/not found linear subsequences, what if there's only 3 and they don't align
+- [x] put some things in functions
 - [ ] instead of picking the previous convex hull when there's overlap, choose the region that is whiter
 - [ ] make consts more forgiving/looser? don't want to overfit/over-rely on 10 training images
 - [ ] make the file ken/windows friendly

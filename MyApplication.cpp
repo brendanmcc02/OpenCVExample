@@ -20,6 +20,25 @@ int pedestrianCrossingGroundTruth[][9] = {
 const Scalar WHITE = Scalar(255, 255, 255);
 const Scalar BLUE = Scalar(255, 0, 0);
 const Scalar GREEN  = Scalar(0, 255, 0);
+// TODO make these safer and increase boundaries?
+const int NUM_MEDIAN_BLUR_ITERATIONS = 1;  // tested for optimal value
+const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value
+const int BINARY_THRESHOLD_VALUE = 100;  // I don't think this matters? because we are using otsu anyway TODO check anyway
+const int BINARY_MAX_THRESHOLD = 255;  // I don't think this matters? because we are using otsu anyway TODO check anyway
+const int CLOSING_KERNEL_SIZE = 2;  // tested for optimal value
+const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
+const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
+const int CONTOUR_SIZE_THRESHOLD = 90;  // tested for optimal value
+const int MIN_CONTOUR_AREA_THRESHOLD = 50;  // not super optimal, lots of trade-offs with 100 so I set to a safe 50 for now.
+const int MAX_CONTOUR_AREA_THRESHOLD = 3000;  // tested for optimal value
+const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
+const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
+const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
+const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;  // tested for optimal value
+const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
+const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
+const float LINE_DEGREES_THRESHOLD = 5.0;  // 5 should be loose, 4 is a bit risky/conservative
+const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;
 
 Mat getGroundTruth(int imageIndex, Mat originalImage) {
 	Mat groundTruthImage = originalImage.clone();
@@ -70,31 +89,55 @@ double angleBetweenLines(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
     return angleInDegrees;
 }
 
-void MyApplication() {
-	
-	// TODO make these safer and increase boundaries?
-	const int NUM_MEDIAN_BLUR_ITERATIONS = 1;  // tested for optimal value
-	const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value
-	const int BINARY_THRESHOLD_VALUE = 100;  // I don't think this matters? because we are using otsu anyway TODO check anyway
-	const int BINARY_MAX_THRESHOLD = 255;  // I don't think this matters? because we are using otsu anyway TODO check anyway
-	const int CLOSING_KERNEL_SIZE = 2;  // tested for optimal value
-	const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
-	const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
-	const int CONTOUR_SIZE_THRESHOLD = 90;  // tested for optimal value
-	const int MIN_CONTOUR_AREA_THRESHOLD = 50;  // not super optimal, lots of trade-offs with 100 so I set to a safe 50 for now.
-	const int MAX_CONTOUR_AREA_THRESHOLD = 3000;  // tested for optimal value
-	const int MIN_HULL_AREA_THRESHOLD = 400;  // tested for optimal value
-	const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
-	const float RECTANGULARITY_THRESHOLD = 0.6;  // tested for optimal value
-	const float MIN_HULL_DISTANCE_THRESHOLD = 5.0;  // tested for optimal value
-	const float MAX_HULL_DISTANCE_THRESHOLD = 150.0;  // might be too tight, 175 would be conservative
-	const float COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
-	const float LINE_DEGREES_THRESHOLD = 5.0;  // 5 should be loose, 4 is a bit risky/conservative
-	const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;
+Mat smoothing(Mat originalImage) {
+	Mat smoothedImage;
+	Mat* medianImages = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
+	medianImages[0] = originalImage;
 
+	for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
+		medianBlur(medianImages[i], medianImages[i+1], MEDIAN_BLUR_FILTER_SIZE);
+	}
+
+	smoothedImage = medianImages[NUM_MEDIAN_BLUR_ITERATIONS];
+	return smoothedImage;
+}
+
+Mat edgeDetection(Mat image) {
+	vector<Mat> inputPlanes(3);
+	Mat processedImage = image.clone();
+	vector<Mat> outputPlanes;
+	split(processedImage, outputPlanes);
+	split(image, inputPlanes);
+	
+	for (int plane = 0; plane < image.channels(); plane++) {
+		Canny(inputPlanes[plane], outputPlanes[plane], CANNY_MIN_THRESHOLD, CANNY_MAX_THRESHOLD);
+	}
+		
+	Mat multispectralEdges;
+	merge(outputPlanes, multispectralEdges);
+	return multispectralEdges;
+}
+
+Mat binaryThreshold(Mat image) {
+	Mat grayscaleImage, otsuImage;
+	cvtColor(image, grayscaleImage, COLOR_BGR2GRAY);
+	threshold(grayscaleImage, otsuImage, BINARY_THRESHOLD_VALUE, 
+			BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
+	return otsuImage;
+}
+
+Mat closing(Mat image) {
+	Mat closingImage;
+	Mat kernel(CLOSING_KERNEL_SIZE, CLOSING_KERNEL_SIZE, CV_8U, Scalar(1));
+	dilate(image, closingImage, kernel);
+	erode(closingImage, closingImage, kernel);
+	return closingImage;
+}
+
+void MyApplication() {
 	// 	get the image
 	char* fileLocation = "../media/";
-	for (int imageIndex = 19; imageIndex <= 19; imageIndex++) {
+	for (int imageIndex = 10; imageIndex <= 19; imageIndex++) {
 		// Get the original image
 		char filename[200];
 		sprintf(filename, "PC%d.jpg", imageIndex);
@@ -108,44 +151,20 @@ void MyApplication() {
 		Mat groundTruthImage = getGroundTruth(imageIndex, originalImage);
 
 		// Iterative Median smoothing
-		Mat smoothedImage;
-		Mat* medianImages = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
-		medianImages[0] = originalImage;
-
-		for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
-			medianBlur(medianImages[i], medianImages[i+1], MEDIAN_BLUR_FILTER_SIZE);
-		}
-
-		smoothedImage = medianImages[NUM_MEDIAN_BLUR_ITERATIONS];
+		Mat smoothedImage = smoothing(originalImage);
 		Mat output1 = JoinImagesHorizontally(originalImage, "Original", smoothedImage, "Median Smoothing");
 
 		// Canny Edge Detection
-		vector<Mat> inputPlanes(3);
-		Mat processedImage = smoothedImage.clone();
-		vector<Mat> outputPlanes;
-		split(processedImage, outputPlanes);
-		split(smoothedImage, inputPlanes);
-		
-		for (int plane = 0; plane < smoothedImage.channels(); plane++) {
-			Canny(inputPlanes[plane], outputPlanes[plane], CANNY_MIN_THRESHOLD, CANNY_MAX_THRESHOLD);
-		}
-			
-		Mat multispectralEdges;
-		merge(outputPlanes, multispectralEdges);
+		Mat multispectralEdges = edgeDetection(smoothedImage);
 		Mat output2 = JoinImagesHorizontally(output1, "", multispectralEdges, "Canny Edge Detection");
 		imshow("Stage 1", output2);
 
 		// Otsu Thresholding
-		Mat grayscaleImage, otsuImage, otsuOutput;
-		cvtColor(multispectralEdges, grayscaleImage, COLOR_BGR2GRAY);
-		threshold(grayscaleImage, otsuImage, BINARY_THRESHOLD_VALUE, 
-				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
+		Mat otsuImage = binaryThreshold(multispectralEdges);
 
 		// Closing Operation: to fill small edge gaps, better results for CCA
-		Mat closingImage;
-		Mat kernel(CLOSING_KERNEL_SIZE, CLOSING_KERNEL_SIZE, CV_8U, Scalar(1));
-		dilate(otsuImage, closingImage, kernel);
-		erode(closingImage, closingImage, kernel);
+		Mat closingImage = closing(otsuImage);
+
 		Mat otsuImageDisplay, closingImageDisplay;
 		cvtColor(otsuImage, otsuImageDisplay, COLOR_GRAY2BGR);
 		cvtColor(closingImage, closingImageDisplay, COLOR_GRAY2BGR);
