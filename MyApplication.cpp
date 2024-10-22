@@ -94,7 +94,7 @@ void MyApplication() {
 
 	// 	get the image
 	char* fileLocation = "../media/";
-	for (int imageIndex = 10; imageIndex <= 19; imageIndex++) {
+	for (int imageIndex = 19; imageIndex <= 19; imageIndex++) {
 		// Get the original image
 		char filename[200];
 		sprintf(filename, "PC%d.jpg", imageIndex);
@@ -159,7 +159,7 @@ void MyApplication() {
 		findContours(binaryImageCopy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
 		int contoursLength = contours.size();
 		vector<vector<Point>> convexHullsUnfiltered(contoursLength);
-		vector<int> convexHullsFilteredIndexes(0);
+		vector<int> convexHullsFiltered(0);
 		Mat contoursImage = Mat::zeros(closingImage.size(), CV_8UC3);
 		Mat minBoundRectangleImage = Mat::zeros(closingImage.size(), CV_8UC3);
 		vector<RotatedRect> minBoundingRectangle(contoursLength);
@@ -187,7 +187,7 @@ void MyApplication() {
 						// Draw the convex hull on 2 different images
 						drawContours(overlayImage, convexHullsUnfiltered, i, BLUE, 2);
 						// add to filtered hull index list
-						convexHullsFilteredIndexes.push_back(i);
+						convexHullsFiltered.push_back(i);
 					}
 				}
 			}
@@ -197,20 +197,20 @@ void MyApplication() {
 		imshow("Stage 2", output4);
 
 		// Check if region is white-ish
-		vector<int> whiteRegionsIndexes(0);
+		vector<int> whiteRegions(0);
 		Mat whiteRegionsImage = originalImage.clone();
-		int convexHullsFilteredIndexesLength = convexHullsFilteredIndexes.size();
-		for (int i = 0; i < convexHullsFilteredIndexesLength; i++) {
+		int convexHullsFilteredLength = convexHullsFiltered.size();
+		for (int i = 0; i < convexHullsFilteredLength; i++) {
 			// get the average colour of the region
 			Mat mask = Mat::zeros(originalImageSize, CV_8UC1);
-			fillConvexPoly(mask, convexHullsUnfiltered[convexHullsFilteredIndexes[i]], Scalar(255));
+			fillConvexPoly(mask, convexHullsUnfiltered[convexHullsFiltered[i]], Scalar(255));
 			Scalar meanColor = mean(originalImage, mask);
 
 			// compare it with white
 			float colorDist = getColorDistance(WHITE, meanColor);
 			if (colorDist <= COLOR_DISTANCE_THRESHOLD) {
-				whiteRegionsIndexes.push_back(convexHullsFilteredIndexes[i]);
-				drawContours(whiteRegionsImage, convexHullsUnfiltered, convexHullsFilteredIndexes[i], BLUE, 2);
+				whiteRegions.push_back(convexHullsFiltered[i]);
+				drawContours(whiteRegionsImage, convexHullsUnfiltered, convexHullsFiltered[i], BLUE, 2);
 			}
 		}
 		Mat output5 = JoinImagesHorizontally(overlayImage, "Convex Hulls", whiteRegionsImage, "White regions");
@@ -219,34 +219,34 @@ void MyApplication() {
 		vector<Point> convexHullCenters(0);
 		vector<int> nonOverlappingConvexHulls(0);
 		Mat closeImage = originalImage.clone();
-		int whiteRegionsIndexesLength = whiteRegionsIndexes.size();
+		int whiteRegionsLength = whiteRegions.size();
 		int prevX = -1.0;
 		int prevY = -1.0;
 		
 		// get center point of each hull
-		for (int i = 0; i < whiteRegionsIndexesLength; i++) {
-			Moments m = moments(convexHullsUnfiltered[whiteRegionsIndexes[i]]);
+		for (int i = 0; i < whiteRegionsLength; i++) {
+			Moments m = moments(convexHullsUnfiltered[whiteRegions[i]]);
 			int centerX = m.m10 / m.m00;
 			int centerY = m.m01 / m.m00;
 
 			// if it's the first hull we spot
 			if (prevX == -1.0 && prevY == -1.0) {
 				convexHullCenters.push_back(Point(centerX, centerY));
-				nonOverlappingConvexHulls.push_back(whiteRegionsIndexes[i]);
+				nonOverlappingConvexHulls.push_back(whiteRegions[i]);
 				prevX = centerX;
 				prevY = centerY;
 			}
 			// else, check if the current hull isn't overlapping with the previous one
 			else if (norm(Point(centerX, centerY) - Point(prevX, prevY)) >= MIN_HULL_DISTANCE_THRESHOLD) {
 				convexHullCenters.push_back(Point(centerX, centerY));
-				nonOverlappingConvexHulls.push_back(whiteRegionsIndexes[i]);
+				nonOverlappingConvexHulls.push_back(whiteRegions[i]);
 				prevX = centerX;
 				prevY = centerY;
 			}
 		}
 
 		// for each hull, calculate its distance to other convexHulls
-		vector<int> closeConvexHullsIndexes(0);
+		vector<int> closeConvexHulls(0);
 		int nonOverlappingConvexHullsLength = nonOverlappingConvexHulls.size();
 		for (int i = 0; i < nonOverlappingConvexHullsLength; i++) {
 			for (int j = 0; j < nonOverlappingConvexHullsLength; j++) {
@@ -254,7 +254,7 @@ void MyApplication() {
 					float dist = norm(convexHullCenters[i] - convexHullCenters[j]);
 					// if there is a close hull
 					if (dist <= MAX_HULL_DISTANCE_THRESHOLD) {
-						closeConvexHullsIndexes.push_back(nonOverlappingConvexHulls[i]);
+						closeConvexHulls.push_back(nonOverlappingConvexHulls[i]);
 						j = nonOverlappingConvexHullsLength; // end inner for loop
 					}
 				}
@@ -263,10 +263,10 @@ void MyApplication() {
 
 		// draw the close convexHulls
 		Mat potentialCrossingsImage = Mat::zeros(closingImage.size(), CV_8UC3);
-		int closeConvexHullsIndexesLength = closeConvexHullsIndexes.size();
-		for (int i = 0; i < closeConvexHullsIndexesLength; i++) {
-			drawContours(closeImage, convexHullsUnfiltered, closeConvexHullsIndexes[i], BLUE, 2);
-			drawContours(potentialCrossingsImage, convexHullsUnfiltered, closeConvexHullsIndexes[i], BLUE, 2);
+		int closeConvexHullsLength = closeConvexHulls.size();
+		for (int i = 0; i < closeConvexHullsLength; i++) {
+			drawContours(closeImage, convexHullsUnfiltered, closeConvexHulls[i], BLUE, 2);
+			drawContours(potentialCrossingsImage, convexHullsUnfiltered, closeConvexHulls[i], BLUE, 2);
 		}
 
 		Mat output6 = JoinImagesHorizontally(output5, "", closeImage, "Close Hulls");
@@ -274,8 +274,8 @@ void MyApplication() {
 
 		// get center point of each potential crossing
 		vector<Point> potentialCrossingsCenters;
-		for (int i = 0; i < closeConvexHullsIndexesLength; i++) {
-			Moments m = moments(convexHullsUnfiltered[closeConvexHullsIndexes[i]]);
+		for (int i = 0; i < closeConvexHullsLength; i++) {
+			Moments m = moments(convexHullsUnfiltered[closeConvexHulls[i]]);
 			int centerX = m.m10 / m.m00;
 			int centerY = m.m01 / m.m00;
 			potentialCrossingsCenters.push_back(Point(centerX, centerY));
@@ -285,59 +285,56 @@ void MyApplication() {
 		int maxCount = 2;
 		float minAngleSum = 181.0;
 		vector<int> maxPotentialCrossings(0);
-		for (int i = 0; i < closeConvexHullsIndexesLength - 2; i++) {
-			for (int j = i+1; j < closeConvexHullsIndexesLength - 1; j++) {
+		for (int i = 0; i < closeConvexHullsLength - 2; i++) {
+			for (int j = i+1; j < closeConvexHullsLength - 1; j++) {
 				int count = 2;
 				float angleSum = 0.0;
-				vector<int> potentialCrossings = {closeConvexHullsIndexes[i], closeConvexHullsIndexes[j]};
+				vector<int> potentialCrossings = {closeConvexHulls[i], closeConvexHulls[j]};
 
-				for (int k = j+1; k < closeConvexHullsIndexesLength; k++) {
+				for (int k = j+1; k < closeConvexHullsLength; k++) {
 					float angle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[j],
 													potentialCrossingsCenters[i], potentialCrossingsCenters[k]);
+					// calculate the angle between a horizontal line, and a line going through the centers of the crossing
+					float horizontalAngle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[k], 
+														  HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
+					
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
-					
-					if (angle <= LINE_DEGREES_THRESHOLD) {
+
+					if (horizontalAngle > 90.0) {
+						horizontalAngle = 180.0 - horizontalAngle;
+					}
+
+					if (angle <= LINE_DEGREES_THRESHOLD && horizontalAngle <= HORIZONTAL_ANGLE_THRESHOLD) {
 						count++;
 						angleSum += angle;
-						potentialCrossings.push_back(closeConvexHullsIndexes[k]);
+						potentialCrossings.push_back(closeConvexHulls[k]);
 					}
-				}
-
-				// check for 'horizontalness'
-				float horizontalAngle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[j], 
-														  HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
-				if (horizontalAngle > 90.0) {
-						horizontalAngle = 180.0 - horizontalAngle;
 				}
 				
-				// if the sequence is 'horizontal'
-				if (horizontalAngle < HORIZONTAL_ANGLE_THRESHOLD) {
-					if (count > maxCount) {
-						maxCount = count;
+				if (count > maxCount) {
+					maxCount = count;
+					minAngleSum = angleSum;
+					maxPotentialCrossings = potentialCrossings;
+					// if we've found a sequence that's already the max possible length, end the loop early
+					if (maxCount == closeConvexHullsLength) {
+						i = closeConvexHullsLength;
+						j = closeConvexHullsLength;
+					}
+					
+				}
+				else if (count == 2) {
+					cout << "no straight sequences found\n";
+				}
+				// if there's a tie for the longest sequence
+				else if (count == maxCount) {
+					// choose the sequence that is 'straighter'
+					if (minAngleSum > angleSum) {
 						minAngleSum = angleSum;
 						maxPotentialCrossings = potentialCrossings;
-						// if we've found a sequence that's already the max possible length, end the loop early
-						if (maxCount == closeConvexHullsIndexesLength) {
-							i = closeConvexHullsIndexesLength;
-							j = closeConvexHullsIndexesLength;
-						}
-						
-					}
-					// if there's a tie for the longest sequence
-					else if (count == maxCount) {
-						// choose the sequence that is 'straighter'
-						if (minAngleSum > angleSum) {
-							minAngleSum = angleSum;
-							maxPotentialCrossings = potentialCrossings;
-						}
 					}
 				}
-				// // the linear sequence of objects is too 'vertical', likely it is not a pedestrian crossing and is something else
-				// else {
-				// 	cout << "not horizontal\n"; 
-				// }
 			}
 		}
 
@@ -382,7 +379,7 @@ void MyApplication() {
 				Moments m2 = moments(convexHullsUnfiltered[maxPotentialCrossings[j]]);
 				int centerX_2 = m2.m10 / m2.m00;
 				int centerY_2 = m2.m01 / m2.m00;
-				slopeTotal += ((float)(centerY_2 - centerY_1) / (float)(centerX_2 - centerX_1));
+				slopeTotal += (float)(centerY_2 - centerY_1) / (float)(centerX_2 - centerX_1);
 				slopeCount++;
 			}
 		}
