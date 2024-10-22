@@ -5,7 +5,7 @@
 // 1. the image number (PC?.jpg)
 // 2. the coordinates of the line at the top of the pedestrian crossing (left column, left row, right column, right row)
 // 3. the coordinates of the line at the bottom of the pedestrian crossing (left column, left row, right column, right row)
-int pedestrian_crossing_ground_truth[][9] = {
+int pedestrianCrossingGroundTruth[][9] = {
 	{ 10,0,132,503,113,0,177,503,148},
 	{ 11,0,131,503,144,0,168,503,177},
 	{ 12,0,154,503,164,0,206,503,213},
@@ -21,26 +21,26 @@ const Scalar WHITE = Scalar(255, 255, 255);
 const Scalar BLUE = Scalar(255, 0, 0);
 const Scalar GREEN  = Scalar(0, 255, 0);
 
-Mat get_ground_truth(int image_index, Mat original_image) {
-	Mat ground_truth_image = original_image.clone();
+Mat getGroundTruth(int imageIndex, Mat originalImage) {
+	Mat groundTruthImage = originalImage.clone();
 	Point * points = new Point[4];
 	
 	// init points
 	for (int i = 1; i < 5; i++) {
-		points[i-1] = Point(pedestrian_crossing_ground_truth[image_index-10][(i*2)-1], 
-							pedestrian_crossing_ground_truth[image_index-10][i*2]);
+		points[i-1] = Point(pedestrianCrossingGroundTruth[imageIndex-10][(i*2)-1], 
+							pedestrianCrossingGroundTruth[imageIndex-10][i*2]);
 	}
 
 	// Draw lines
-	line(ground_truth_image, points[0], points[1], GREEN, 2);
-	line(ground_truth_image, points[0], points[2], GREEN, 2);
-	line(ground_truth_image, points[1], points[3], GREEN, 2);
-	line(ground_truth_image, points[2], points[3], GREEN, 2);
+	line(groundTruthImage, points[0], points[1], GREEN, 2);
+	line(groundTruthImage, points[0], points[2], GREEN, 2);
+	line(groundTruthImage, points[1], points[3], GREEN, 2);
+	line(groundTruthImage, points[2], points[3], GREEN, 2);
 
-	return ground_truth_image;
+	return groundTruthImage;
 }
 
-float get_color_distance(const Scalar& s1, const Scalar& s2) {
+float getColorDistance(const Scalar& s1, const Scalar& s2) {
     float dist = 0;
 
     for (int i = 0; i < 3; ++i) {
@@ -93,207 +93,207 @@ void MyApplication() {
 	const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;
 
 	// 	get the image
-	char* file_location = "../media/";
-	for (int image_index = 10; image_index <= 19; image_index++) {
+	char* fileLocation = "../media/";
+	for (int imageIndex = 10; imageIndex <= 19; imageIndex++) {
 		// Get the original image
 		char filename[200];
-		sprintf(filename, "PC%d.jpg", image_index);
-		string file(file_location);
+		sprintf(filename, "PC%d.jpg", imageIndex);
+		string file(fileLocation);
 		file.append(filename);
-		Mat original_image;
-		original_image = imread(file, -1);
-		const Size original_image_size = original_image.size();
-		const Point HORIZONTAL_LINE_1 = Point(0.0, original_image_size.height/2.0);
-		const Point HORIZONTAL_LINE_2 = Point(original_image_size.width, original_image_size.height/2.0);
-		Mat ground_truth_image = get_ground_truth(image_index, original_image);
+		Mat originalImage;
+		originalImage = imread(file, -1);
+		const Size originalImageSize = originalImage.size();
+		const Point HORIZONTAL_LINE_1 = Point(0.0, originalImageSize.height/2.0);
+		const Point HORIZONTAL_LINE_2 = Point(originalImageSize.width, originalImageSize.height/2.0);
+		Mat groundTruthImage = getGroundTruth(imageIndex, originalImage);
 
 		// Iterative Median smoothing
-		Mat smoothed_image;
-		Mat* median_images = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
-		median_images[0] = original_image;
+		Mat smoothedImage;
+		Mat* medianImages = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
+		medianImages[0] = originalImage;
 
 		for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
-			medianBlur(median_images[i], median_images[i+1], MEDIAN_BLUR_FILTER_SIZE);
+			medianBlur(medianImages[i], medianImages[i+1], MEDIAN_BLUR_FILTER_SIZE);
 		}
 
-		smoothed_image = median_images[NUM_MEDIAN_BLUR_ITERATIONS];
-		Mat output_1 = JoinImagesHorizontally(original_image, "Original", smoothed_image, "Median Smoothing");
+		smoothedImage = medianImages[NUM_MEDIAN_BLUR_ITERATIONS];
+		Mat output1 = JoinImagesHorizontally(originalImage, "Original", smoothedImage, "Median Smoothing");
 
 		// Canny Edge Detection
-		vector<Mat> input_planes(3);
-		Mat processed_image = smoothed_image.clone();
-		vector<Mat> output_planes;
-		split(processed_image, output_planes);
-		split(smoothed_image, input_planes);
+		vector<Mat> inputPlanes(3);
+		Mat processedImage = smoothedImage.clone();
+		vector<Mat> outputPlanes;
+		split(processedImage, outputPlanes);
+		split(smoothedImage, inputPlanes);
 		
-		for (int plane = 0; plane < smoothed_image.channels(); plane++) {
-			Canny(input_planes[plane], output_planes[plane], CANNY_MIN_THRESHOLD, CANNY_MAX_THRESHOLD);
+		for (int plane = 0; plane < smoothedImage.channels(); plane++) {
+			Canny(inputPlanes[plane], outputPlanes[plane], CANNY_MIN_THRESHOLD, CANNY_MAX_THRESHOLD);
 		}
 			
-		Mat multispectral_edges;
-		merge(output_planes, multispectral_edges);
-		Mat output_2 = JoinImagesHorizontally(output_1, "", multispectral_edges, "Canny Edge Detection");
-		imshow("Stage 1", output_2);
+		Mat multispectralEdges;
+		merge(outputPlanes, multispectralEdges);
+		Mat output2 = JoinImagesHorizontally(output1, "", multispectralEdges, "Canny Edge Detection");
+		imshow("Stage 1", output2);
 
 		// Otsu Thresholding
-		Mat grayscale_image, otsu_image, otsu_output;
-		cvtColor(multispectral_edges, grayscale_image, COLOR_BGR2GRAY);
-		threshold(grayscale_image, otsu_image, BINARY_THRESHOLD_VALUE, 
+		Mat grayscaleImage, otsuImage, otsuOutput;
+		cvtColor(multispectralEdges, grayscaleImage, COLOR_BGR2GRAY);
+		threshold(grayscaleImage, otsuImage, BINARY_THRESHOLD_VALUE, 
 				  BINARY_MAX_THRESHOLD, THRESH_BINARY | THRESH_OTSU);
 
 		// Closing Operation: to fill small edge gaps, better results for CCA
-		Mat closing_image;
+		Mat closingImage;
 		Mat kernel(CLOSING_KERNEL_SIZE, CLOSING_KERNEL_SIZE, CV_8U, Scalar(1));
-		dilate(otsu_image, closing_image, kernel);
-		erode(closing_image, closing_image, kernel);
-		Mat otsu_image_display, closing_image_display;
-		cvtColor(otsu_image, otsu_image_display, COLOR_GRAY2BGR);
-		cvtColor(closing_image, closing_image_display, COLOR_GRAY2BGR);
-		Mat output_3 = JoinImagesHorizontally(otsu_image_display, "Otsu Thresholding", closing_image_display, "Closing");
+		dilate(otsuImage, closingImage, kernel);
+		erode(closingImage, closingImage, kernel);
+		Mat otsuImageDisplay, closingImageDisplay;
+		cvtColor(otsuImage, otsuImageDisplay, COLOR_GRAY2BGR);
+		cvtColor(closingImage, closingImageDisplay, COLOR_GRAY2BGR);
+		Mat output3 = JoinImagesHorizontally(otsuImageDisplay, "Otsu Thresholding", closingImageDisplay, "Closing");
 
 		// CCA & Shape Analysis
-		Mat overlay_image = original_image.clone();
+		Mat overlayImage = originalImage.clone();
 		vector<vector<Point>> contours;
 		vector<Vec4i> hierarchy;
-		Mat binary_image_copy = closing_image.clone();
-		findContours(binary_image_copy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
-		int contours_length = contours.size();
-		vector<vector<Point>> hulls_unfiltered(contours_length);
-		vector<int> hulls_filtered_indexes(0);
-		Mat contours_image = Mat::zeros(closing_image.size(), CV_8UC3);
-		Mat min_bound_rectangle_image = Mat::zeros(closing_image.size(), CV_8UC3);
-		vector<RotatedRect> min_bounding_rectangle(contours_length);
+		Mat binaryImageCopy = closingImage.clone();
+		findContours(binaryImageCopy, contours, hierarchy, RETR_TREE, CHAIN_APPROX_NONE);
+		int contoursLength = contours.size();
+		vector<vector<Point>> convexHullsUnfiltered(contoursLength);
+		vector<int> convexHullsFilteredIndexes(0);
+		Mat contoursImage = Mat::zeros(closingImage.size(), CV_8UC3);
+		Mat minBoundRectangleImage = Mat::zeros(closingImage.size(), CV_8UC3);
+		vector<RotatedRect> minBoundingRectangle(contoursLength);
 
-		for (int i = 0; i < contours_length; i++) {
+		for (int i = 0; i < contoursLength; i++) {
 			// filter by contour perimeter and area
 			int contour_area = contourArea(contours[i]);
 			if (contours[i].size() >= CONTOUR_SIZE_THRESHOLD && contour_area >= MIN_CONTOUR_AREA_THRESHOLD
 				&& contour_area <= MAX_CONTOUR_AREA_THRESHOLD) {
 				// CCA
-				drawContours(contours_image, contours, i, Scalar(255, 255, 255), FILLED, 8, hierarchy);
+				drawContours(contoursImage, contours, i, Scalar(255, 255, 255), FILLED, 8, hierarchy);
 
-				// draw Hulls around edges
-				convexHull(contours[i], hulls_unfiltered[i]);
-				int hull_area = contourArea(hulls_unfiltered[i]);
+				// draw convex hulls around edges
+				convexHull(contours[i], convexHullsUnfiltered[i]);
+				int convexHullArea = contourArea(convexHullsUnfiltered[i]);
 
-				// filter by hull area
-				if (hull_area >= MIN_HULL_AREA_THRESHOLD && hull_area <= MAX_HULL_AREA_THRESHOLD) {
-					min_bounding_rectangle[i] = minAreaRect(contours[i]);
-					int min_bound_rect_area = min_bounding_rectangle[i].size.width * min_bounding_rectangle[i].size.height;
-					float rectangularity = ((float)hull_area / (float)min_bound_rect_area);
+				// filter by convex hull area
+				if (convexHullArea >= MIN_HULL_AREA_THRESHOLD && convexHullArea <= MAX_HULL_AREA_THRESHOLD) {
+					minBoundingRectangle[i] = minAreaRect(contours[i]);
+					int minBoundRectArea = minBoundingRectangle[i].size.width * minBoundingRectangle[i].size.height;
+					float rectangularity = ((float)convexHullArea / (float)minBoundRectArea);
 					
 					// filter by rectangularity
 					if (rectangularity >= RECTANGULARITY_THRESHOLD) {
 						// Draw the convex hull on 2 different images
-						drawContours(overlay_image, hulls_unfiltered, i, BLUE, 2);
+						drawContours(overlayImage, convexHullsUnfiltered, i, BLUE, 2);
 						// add to filtered hull index list
-						hulls_filtered_indexes.push_back(i);
+						convexHullsFilteredIndexes.push_back(i);
 					}
 				}
 			}
 		}
 
-		Mat output_4 = JoinImagesHorizontally(output_3, "", contours_image, "CCA");
-		imshow("Stage 2", output_4);
+		Mat output4 = JoinImagesHorizontally(output3, "", contoursImage, "CCA");
+		imshow("Stage 2", output4);
 
 		// Check if region is white-ish
-		vector<int> white_regions_indexes(0);
-		Mat white_regions_image = original_image.clone();
-		int hulls_filtered_indexes_length = hulls_filtered_indexes.size();
-		for (int i = 0; i < hulls_filtered_indexes_length; i++) {
+		vector<int> whiteRegionsIndexes(0);
+		Mat whiteRegionsImage = originalImage.clone();
+		int convexHullsFilteredIndexesLength = convexHullsFilteredIndexes.size();
+		for (int i = 0; i < convexHullsFilteredIndexesLength; i++) {
 			// get the average colour of the region
-			Mat mask = Mat::zeros(original_image_size, CV_8UC1);
-			fillConvexPoly(mask, hulls_unfiltered[hulls_filtered_indexes[i]], Scalar(255));
-			Scalar meanColor = mean(original_image, mask);
+			Mat mask = Mat::zeros(originalImageSize, CV_8UC1);
+			fillConvexPoly(mask, convexHullsUnfiltered[convexHullsFilteredIndexes[i]], Scalar(255));
+			Scalar meanColor = mean(originalImage, mask);
 
 			// compare it with white
-			float color_dist = get_color_distance(WHITE, meanColor);
-			if (color_dist <= COLOR_DISTANCE_THRESHOLD) {
-				white_regions_indexes.push_back(hulls_filtered_indexes[i]);
-				drawContours(white_regions_image, hulls_unfiltered, hulls_filtered_indexes[i], BLUE, 2);
+			float colorDist = getColorDistance(WHITE, meanColor);
+			if (colorDist <= COLOR_DISTANCE_THRESHOLD) {
+				whiteRegionsIndexes.push_back(convexHullsFilteredIndexes[i]);
+				drawContours(whiteRegionsImage, convexHullsUnfiltered, convexHullsFilteredIndexes[i], BLUE, 2);
 			}
 		}
-		Mat output_5 = JoinImagesHorizontally(overlay_image, "Convex Hulls", white_regions_image, "White regions");
+		Mat output5 = JoinImagesHorizontally(overlayImage, "Convex Hulls", whiteRegionsImage, "White regions");
 
-		// Filter isolated hulls
-		vector<Point> hull_centers(0);
-		vector<int> non_overlapping_hulls(0);
-		Mat close_image = original_image.clone();
-		int white_regions_indexes_length = white_regions_indexes.size();
-		int prev_x = -1.0;
-		int prev_y = -1.0;
+		// Filter isolated convex hulls
+		vector<Point> convexHullCenters(0);
+		vector<int> nonOverlappingConvexHulls(0);
+		Mat closeImage = originalImage.clone();
+		int whiteRegionsIndexesLength = whiteRegionsIndexes.size();
+		int prevX = -1.0;
+		int prevY = -1.0;
 		
 		// get center point of each hull
-		for (int i = 0; i < white_regions_indexes_length; i++) {
-			Moments m = moments(hulls_unfiltered[white_regions_indexes[i]]);
-			int center_x = m.m10 / m.m00;
-			int center_y = m.m01 / m.m00;
+		for (int i = 0; i < whiteRegionsIndexesLength; i++) {
+			Moments m = moments(convexHullsUnfiltered[whiteRegionsIndexes[i]]);
+			int centerX = m.m10 / m.m00;
+			int centerY = m.m01 / m.m00;
 
 			// if it's the first hull we spot
-			if (prev_x == -1.0 && prev_y == -1.0) {
-				hull_centers.push_back(Point(center_x, center_y));
-				non_overlapping_hulls.push_back(white_regions_indexes[i]);
-				prev_x = center_x;
-				prev_y = center_y;
+			if (prevX == -1.0 && prevY == -1.0) {
+				convexHullCenters.push_back(Point(centerX, centerY));
+				nonOverlappingConvexHulls.push_back(whiteRegionsIndexes[i]);
+				prevX = centerX;
+				prevY = centerY;
 			}
 			// else, check if the current hull isn't overlapping with the previous one
-			else if (norm(Point(center_x, center_y) - Point(prev_x, prev_y)) >= MIN_HULL_DISTANCE_THRESHOLD) {
-				hull_centers.push_back(Point(center_x, center_y));
-				non_overlapping_hulls.push_back(white_regions_indexes[i]);
-				prev_x = center_x;
-				prev_y = center_y;
+			else if (norm(Point(centerX, centerY) - Point(prevX, prevY)) >= MIN_HULL_DISTANCE_THRESHOLD) {
+				convexHullCenters.push_back(Point(centerX, centerY));
+				nonOverlappingConvexHulls.push_back(whiteRegionsIndexes[i]);
+				prevX = centerX;
+				prevY = centerY;
 			}
 		}
 
-		// for each hull, calculate its distance to other hulls
-		vector<int> close_hulls_indexes(0);
-		int non_overlapping_hulls_length = non_overlapping_hulls.size();
-		for (int i = 0; i < non_overlapping_hulls_length; i++) {
-			for (int j = 0; j < non_overlapping_hulls_length; j++) {
+		// for each hull, calculate its distance to other convexHulls
+		vector<int> closeConvexHullsIndexes(0);
+		int nonOverlappingConvexHullsLength = nonOverlappingConvexHulls.size();
+		for (int i = 0; i < nonOverlappingConvexHullsLength; i++) {
+			for (int j = 0; j < nonOverlappingConvexHullsLength; j++) {
 				if (j != i) {
-					float dist = norm(hull_centers[i] - hull_centers[j]);
+					float dist = norm(convexHullCenters[i] - convexHullCenters[j]);
 					// if there is a close hull
 					if (dist <= MAX_HULL_DISTANCE_THRESHOLD) {
-						close_hulls_indexes.push_back(non_overlapping_hulls[i]);
-						j = non_overlapping_hulls_length; // end inner for loop
+						closeConvexHullsIndexes.push_back(nonOverlappingConvexHulls[i]);
+						j = nonOverlappingConvexHullsLength; // end inner for loop
 					}
 				}
 			}
 		}
 
-		// draw the close hulls
-		Mat potential_crossings_image= Mat::zeros(closing_image.size(), CV_8UC3);
-		int close_hulls_indexes_length = close_hulls_indexes.size();
-		for (int i = 0; i < close_hulls_indexes_length; i++) {
-			drawContours(close_image, hulls_unfiltered, close_hulls_indexes[i], BLUE, 2);
-			drawContours(potential_crossings_image, hulls_unfiltered, close_hulls_indexes[i], BLUE, 2);
+		// draw the close convexHulls
+		Mat potentialCrossingsImage = Mat::zeros(closingImage.size(), CV_8UC3);
+		int closeConvexHullsIndexesLength = closeConvexHullsIndexes.size();
+		for (int i = 0; i < closeConvexHullsIndexesLength; i++) {
+			drawContours(closeImage, convexHullsUnfiltered, closeConvexHullsIndexes[i], BLUE, 2);
+			drawContours(potentialCrossingsImage, convexHullsUnfiltered, closeConvexHullsIndexes[i], BLUE, 2);
 		}
 
-		Mat output_6 = JoinImagesHorizontally(output_5, "", close_image, "Close Hulls");
-		imshow("Stage 3", output_6);
+		Mat output6 = JoinImagesHorizontally(output5, "", closeImage, "Close Hulls");
+		imshow("Stage 3", output6);
 
 		// get center point of each potential crossing
-		vector<Point> potential_crossings_centers;
-		for (int i = 0; i < close_hulls_indexes_length; i++) {
-			Moments m = moments(hulls_unfiltered[close_hulls_indexes[i]]);
-			int center_x = m.m10 / m.m00;
-			int center_y = m.m01 / m.m00;
-			potential_crossings_centers.push_back(Point(center_x, center_y));
+		vector<Point> potentialCrossingsCenters;
+		for (int i = 0; i < closeConvexHullsIndexesLength; i++) {
+			Moments m = moments(convexHullsUnfiltered[closeConvexHullsIndexes[i]]);
+			int centerX = m.m10 / m.m00;
+			int centerY = m.m01 / m.m00;
+			potentialCrossingsCenters.push_back(Point(centerX, centerY));
 		}
 
 		// Find the longest linear sequence amongst the potential pedestrian crossings
 		int maxCount = 2;
 		float minAngleSum = 181.0;
-		vector<int> max_potential_crossings(0);
-		for (int i = 0; i < close_hulls_indexes_length - 2; i++) {
-			for (int j = i+1; j < close_hulls_indexes_length - 1; j++) {
+		vector<int> maxPotentialCrossings(0);
+		for (int i = 0; i < closeConvexHullsIndexesLength - 2; i++) {
+			for (int j = i+1; j < closeConvexHullsIndexesLength - 1; j++) {
 				int count = 2;
 				float angleSum = 0.0;
-				vector<int> potential_crossings = {close_hulls_indexes[i], close_hulls_indexes[j]};
+				vector<int> potentialCrossings = {closeConvexHullsIndexes[i], closeConvexHullsIndexes[j]};
 
-				for (int k = j+1; k < close_hulls_indexes_length; k++) {
-					float angle = angleBetweenLines(potential_crossings_centers[i], potential_crossings_centers[j],
-													potential_crossings_centers[i], potential_crossings_centers[k]);
+				for (int k = j+1; k < closeConvexHullsIndexesLength; k++) {
+					float angle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[j],
+													potentialCrossingsCenters[i], potentialCrossingsCenters[k]);
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
@@ -301,12 +301,12 @@ void MyApplication() {
 					if (angle <= LINE_DEGREES_THRESHOLD) {
 						count++;
 						angleSum += angle;
-						potential_crossings.push_back(close_hulls_indexes[k]);
+						potentialCrossings.push_back(closeConvexHullsIndexes[k]);
 					}
 				}
 
 				// check for 'horizontalness'
-				float horizontalAngle = angleBetweenLines(potential_crossings_centers[i], potential_crossings_centers[j], 
+				float horizontalAngle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[j], 
 														  HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
 				if (horizontalAngle > 90.0) {
 						horizontalAngle = 180.0 - horizontalAngle;
@@ -317,11 +317,11 @@ void MyApplication() {
 					if (count > maxCount) {
 						maxCount = count;
 						minAngleSum = angleSum;
-						max_potential_crossings = potential_crossings;
+						maxPotentialCrossings = potentialCrossings;
 						// if we've found a sequence that's already the max possible length, end the loop early
-						if (maxCount == close_hulls_indexes_length) {
-							i = close_hulls_indexes_length;
-							j = close_hulls_indexes_length;
+						if (maxCount == closeConvexHullsIndexesLength) {
+							i = closeConvexHullsIndexesLength;
+							j = closeConvexHullsIndexesLength;
 						}
 						
 					}
@@ -330,7 +330,7 @@ void MyApplication() {
 						// choose the sequence that is 'straighter'
 						if (minAngleSum > angleSum) {
 							minAngleSum = angleSum;
-							max_potential_crossings = potential_crossings;
+							maxPotentialCrossings = potentialCrossings;
 						}
 					}
 				}
@@ -342,21 +342,21 @@ void MyApplication() {
 		}
 
 		// draw the potential pedestrian crossings
-		int max_potential_crossing_length = max_potential_crossings.size();
-		Mat pedestrian_crossing_image = Mat::zeros(original_image_size, CV_8UC3);
-		for (int i = 0; i < max_potential_crossing_length; i++) {
-			drawContours(pedestrian_crossing_image, hulls_unfiltered, max_potential_crossings[i], GREEN, 2);
+		int maxPotentialCrossingLength = maxPotentialCrossings.size();
+		Mat pedestrianCrossingImage = Mat::zeros(originalImageSize, CV_8UC3);
+		for (int i = 0; i < maxPotentialCrossingLength; i++) {
+			drawContours(pedestrianCrossingImage, convexHullsUnfiltered, maxPotentialCrossings[i], GREEN, 2);
 		}
 
-		imshow("Stage 4", pedestrian_crossing_image);
+		imshow("Stage 4", pedestrianCrossingImage);
 
 		// find the min & max y-coordinate out of all the pedestrian crossings
-		int minY = original_image_size.height;
+		int minY = originalImageSize.height;
 		int minX = 0;
 		int maxY = 0;
 		int maxX = 0;
-		for (int i = 0; i < max_potential_crossing_length; i++) {
-			for (Point point : hulls_unfiltered[max_potential_crossings[i]]) {
+		for (int i = 0; i < maxPotentialCrossingLength; i++) {
+			for (Point point : convexHullsUnfiltered[maxPotentialCrossings[i]]) {
 				
 				int y = point.y;
 				if (y < minY) {
@@ -374,15 +374,15 @@ void MyApplication() {
 		// get the average slope of the lines going through the centers of the pedestrian crossings
 		float slopeTotal = 0.0;
 		int slopeCount = 0;
-		for (int i = 0; i < max_potential_crossing_length - 1; i++) {
-			for (int j = i + 1; j < max_potential_crossing_length; j++) {
-				Moments m_1 = moments(hulls_unfiltered[max_potential_crossings[i]]);
-				int center_x_1 = m_1.m10 / m_1.m00;
-				int center_y_1 = m_1.m01 / m_1.m00;
-				Moments m_2 = moments(hulls_unfiltered[max_potential_crossings[j]]);
-				int center_x_2 = m_2.m10 / m_2.m00;
-				int center_y_2 = m_2.m01 / m_2.m00;
-				slopeTotal += ((float)(center_y_2 - center_y_1) / (float)(center_x_2 - center_x_1));
+		for (int i = 0; i < maxPotentialCrossingLength - 1; i++) {
+			for (int j = i + 1; j < maxPotentialCrossingLength; j++) {
+				Moments m1 = moments(convexHullsUnfiltered[maxPotentialCrossings[i]]);
+				int centerX_1 = m1.m10 / m1.m00;
+				int centerY_1 = m1.m01 / m1.m00;
+				Moments m2 = moments(convexHullsUnfiltered[maxPotentialCrossings[j]]);
+				int centerX_2 = m2.m10 / m2.m00;
+				int centerY_2 = m2.m01 / m2.m00;
+				slopeTotal += ((float)(centerY_2 - centerY_1) / (float)(centerX_2 - centerX_1));
 				slopeCount++;
 			}
 		}
@@ -390,20 +390,20 @@ void MyApplication() {
 		float meanSlope = slopeTotal / slopeCount;
 
 		// draw the enclosing box
-		Mat predicted_image = original_image.clone();
-		int width = original_image_size.width - 1;
+		Mat predictedImage = originalImage.clone();
+		int width = originalImageSize.width - 1;
 		float intercept = maxY - (meanSlope * maxX);
-		Point bottom_left = Point(0, intercept);
-		Point bottom_right = Point(width, (meanSlope * width) + intercept);
+		Point bottomLeft = Point(0, intercept);
+		Point bottomRight = Point(width, (meanSlope * width) + intercept);
 		intercept = minY - (meanSlope * minX);
-		Point top_left = Point(0, intercept);
-		Point top_right = Point(width, (meanSlope * width) + intercept);
-		line(predicted_image, bottom_left, bottom_right, BLUE, 2);
-		line(predicted_image, top_left, top_right, BLUE, 2);
-		line(predicted_image, top_left, bottom_left, BLUE, 2);
-		line(predicted_image, top_right, bottom_right, BLUE, 2);
+		Point topLeft = Point(0, intercept);
+		Point topRight = Point(width, (meanSlope * width) + intercept);
+		line(predictedImage, bottomLeft, bottomRight, BLUE, 2);
+		line(predictedImage, topLeft, topRight, BLUE, 2);
+		line(predictedImage, topLeft, bottomLeft, BLUE, 2);
+		line(predictedImage, topRight, bottomRight, BLUE, 2);
 
-		Mat output = JoinImagesHorizontally(ground_truth_image, "Original", predicted_image, "Predicted");
+		Mat output = JoinImagesHorizontally(groundTruthImage, "Original", predictedImage, "Predicted");
 		imshow("Final Output", output);
 
 		// go to next image

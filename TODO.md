@@ -1,6 +1,6 @@
 # TODO
 
-## General
+## Essentials
 
 - [x] draw ground truth
 - [x] binary threshold canny
@@ -26,12 +26,8 @@
 ## Other
 
 - [x] change c iter variable to i
-
+- [x] change naming to lowerCamelCase
 - [ ] error handling for empty/not found linear subsequences, what if there's only 3 and they don't align
 - [ ] instead of picking the previous hull when there's overlap, choose the region that is whiter
-- [ ] hough transform **results aren't very convincing**
-- [ ] change naming to lowerCamelCase
 - [ ] make consts more forgiving/looser? don't want to overfit/over-rely on 10 training images
-- [ ] ~~try gaussian smoothing instead of median? **don't think it would be good because median smoothing preserves edges~~
-- [ ] ~~filter by hull edge size (or ratio of width-height)~~ don't think it's important as we already filter by area
 - [ ] make the file ken/windows friendly
