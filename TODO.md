@@ -32,5 +32,5 @@
 - [ ] ~~instead of picking the previous convex hull when there's overlap, choose the region that is whiter~~
 - [x] test on images outside of training set
 - [x] make consts more forgiving/looser? don't want to overfit/over-rely on 10 training images
-- [ ] test on non-pedestrian images; e.g. road markings
+- [x] test on non-pedestrian images; e.g. road markings, yield lines
 - [ ] make the file ken/windows friendly

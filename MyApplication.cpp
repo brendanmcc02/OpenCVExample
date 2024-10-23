@@ -40,6 +40,7 @@ const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;  // tested for optimal value
 
 Mat getGroundTruth(int imageIndex, Mat originalImage) {
 	Mat groundTruthImage = originalImage.clone();
+#if !TEST
 	Point * points = new Point[4];
 	
 	// init points
@@ -53,7 +54,7 @@ Mat getGroundTruth(int imageIndex, Mat originalImage) {
 	line(groundTruthImage, points[0], points[2], GREEN, 2);
 	line(groundTruthImage, points[1], points[3], GREEN, 2);
 	line(groundTruthImage, points[2], points[3], GREEN, 2);
-
+#endif
 	return groundTruthImage;
 }
 
@@ -135,7 +136,7 @@ void MyApplication() {
 	// 	get the image
 	char* fileLocation = "../media/";
 #if TEST
-	for (int imageIndex = 1; imageIndex <= 6; imageIndex++) {
+	for (int imageIndex = 1; imageIndex <= 11; imageIndex++) {
 		// Get the original image
 		char filename[200];
 		sprintf(filename, "test-%d.jpg", imageIndex);
