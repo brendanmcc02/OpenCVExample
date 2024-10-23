@@ -1,3 +1,4 @@
+/*
 #include "Utilities.h"
 #include <list>
 #define DEBUG false
@@ -38,7 +39,7 @@ const float WHITE_COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 const float LINE_DEGREES_THRESHOLD = 8.0;  // train: 5.0
 const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;  // tested for optimal value
 
-Mat getGroundTruth(int imageIndex, Mat originalImage) {
+Mat getGroundTruth(int imageIndex, Mat& originalImage) {
 	Mat groundTruthImage = originalImage.clone();
 #if !TEST
 	Point * points = new Point[4];
@@ -91,7 +92,7 @@ double angleBetweenLines(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
     return angleInDegrees;
 }
 
-Mat smoothing(Mat originalImage) {
+Mat smoothing(Mat& originalImage) {
 	Mat smoothedImage;
 	Mat* medianImages = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
 	medianImages[0] = originalImage;
@@ -104,7 +105,7 @@ Mat smoothing(Mat originalImage) {
 	return smoothedImage;
 }
 
-Mat edgeDetection(Mat image) {
+Mat edgeDetection(Mat& image) {
 	vector<Mat> inputPlanes(3);
 	Mat processedImage = image.clone();
 	vector<Mat> outputPlanes;
@@ -120,14 +121,14 @@ Mat edgeDetection(Mat image) {
 	return multispectralEdges;
 }
 
-Mat binaryThreshold(Mat image) {
+Mat binaryThreshold(Mat& image) {
 	Mat grayscaleImage, otsuImage;
 	cvtColor(image, grayscaleImage, COLOR_BGR2GRAY);
 	threshold(grayscaleImage, otsuImage, 100, 255, THRESH_BINARY | THRESH_OTSU);
 	return otsuImage;
 }
 
-Mat closing(Mat image) {
+Mat closing(Mat& image) {
 	Mat closingImage;
 	Mat kernel(CLOSING_KERNEL_SIZE, CLOSING_KERNEL_SIZE, CV_8U, Scalar(1));
 	dilate(image, closingImage, kernel);
@@ -142,12 +143,12 @@ void MyApplication() {
 	for (int imageIndex = 1; imageIndex <= 11; imageIndex++) {
 		// Get the original image
 		char filename[200];
-		sprintf(filename, "test-%d.jpg", imageIndex);
+		sprintf_s(filename, "test-%d.jpg", imageIndex);
 #else
 	for (int imageIndex = 10; imageIndex <= 19; imageIndex++) {
 		// Get the original image
 		char filename[200];
-		sprintf(filename, "PC%d.jpg", imageIndex);
+		sprintf_s(filename, "PC%d.jpg", imageIndex);
 #endif
 		string file(fileLocation);
 		file.append(filename);
@@ -451,3 +452,4 @@ void MyApplication() {
 		destroyAllWindows();
 	}
 }
+*/

@@ -33,4 +33,4 @@
 - [x] test on images outside of training set
 - [x] make consts more forgiving/looser? don't want to overfit/over-rely on 10 training images
 - [x] test on non-pedestrian images; e.g. road markings, yield lines
-- [ ] make the file ken/windows friendly
+- [x] make the file ken/windows friendly
