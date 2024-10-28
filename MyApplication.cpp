@@ -54,9 +54,9 @@ Mat getGroundTruth(int imageIndex, Mat originalImage) {
 			Point * points = new Point[4];
 	
 			// init points
-			for (int i = 1; i < 5; i++) {
-				points[i-1] = Point(pedestrianCrossingGroundTruth[imageIndex-10][(i*2)-1], 
-									pedestrianCrossingGroundTruth[imageIndex-10][i*2]);
+			for (int j = 1; j < 5; j++) {
+				points[j-1] = Point(pedestrianCrossingGroundTruth[i][(j*2)-1], 
+									pedestrianCrossingGroundTruth[i][j*2]);
 			}
 
 			// Draw lines
