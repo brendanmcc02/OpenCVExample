@@ -16,7 +16,7 @@
 	
 	\section*{Introduction}
 	
-	The goal of this assignment is to detect pedestrian crossings in images taken from a car's point of view. Firstly, I will describe in depth the theory behind my process, and then present results and analyses both successes and failures.
+	The goal of this assignment is to detect pedestrian crossings in images taken from a car's point of view. Firstly, I will describe in depth the theory behind my process, and then present results and analyse both successes and failures.
 	
 	\section{Theory of the Processing}
 	
@@ -33,6 +33,40 @@
 	I chose to go with \textbf{Canny Edge Detection} as opposed to Boundary Chain Codes, because with Canny I could have more customisation over the results by changing the parameters, whereas with Boundary Chain Codes it was more limiting.
 	
 	The low and high thresholds were chosen mostly based on trial-and-error. I ensured that my low threshold value was conservative, as this is indicative of the number of contours detected by Canny, and I wanted to be sure that my edge detection would not miss out on any potential pedestrian crossings.
+	
+	\subsection{Binary Thresholding}
+	
+	The output of the previous step in the process was an RGB multispectral image, and I wanted a binary image to simplify things further. I used \textbf{Otsu Thresholding} to convert to binary, followed by a closing operation. This was done to fill any potential gaps in the edges of pedestrian crossings. From some trial-and-error testing, I found a kernel size of 2 to be optimal for my process.
+	
+	\subsection{Connected Components Analysis and Shape Analysis}
+	
+	My next goal was to find contours in the binary image. I used CCA for its simplicity, and also because it showed great results on my initial testing.
+	
+	After finding all the contours in the image, they would then go through the following filtering process:
+	
+	\emph{All parameters were chosen through trial-and-error testings.}
+	
+	\begin{enumerate}
+		\item Filter by Contour perimeter and area
+		\begin{itemize}
+			\item Contour Perimeter $>= 90$
+			\item $50 <= $ Contour Area $ <= 3000$
+		\end{itemize}
+		\item Convex Hulls were then drawn around these contours. The Convex Hulls were filtered by area.
+		\begin{itemize}
+			\item $500 <= $ Convex Hull Area $ <= 3500$
+		\end{itemize}
+		\item Convex Hulls were filtered by rectangularity.
+		\begin{itemize}
+			\item Rectangularity $>= 0.5$
+		\end{itemize}
+	\end{enumerate}
+	
+	After going through this filtering process, we now have a list of filtered convex hulls that potentially identify as pedestrian crossings.
+	
+	\subsection{Colour}
+	
+	One distinctive trait of pedestrian crossings are it's white-ish colour. For each filtered convex hull, the mean colour of the convex hull is calculated. This RGB value is compared to the white RGB value by calculating the Euclidean distance between the two 3D vectors. From trial-and-error testing, I found $150.0$ to be a forgiving value, but with good results.
 	
 	\newpage
 	\section{Results and Analysis}

@@ -53,7 +53,7 @@ vector<Point> getGroundTruthPoints(int imageIndex) {
 			// init points
 			for (int j = 1; j < 5; j++) {
 				groundTruthPoints.push_back(Point(pedestrianCrossingGroundTruth[i][(j*2)-1], 
-									pedestrianCrossingGroundTruth[i][j*2]));
+												  pedestrianCrossingGroundTruth[i][j*2]));
 			}
 
 			i = pedestrianCrossingGroundTruthSize; // end loop
