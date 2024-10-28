@@ -1,7 +1,6 @@
 #include "Utilities.h"
 #include <list>
 #define DEBUG false
-#define TEST false
 // Ground truth for pedestrian crossings.  Each row contains
 // 1. the image number (PC?.jpg)
 // 2. the coordinates of the line at the top of the pedestrian crossing (left column, left row, right column, right row)
@@ -25,6 +24,8 @@ int pedestrianCrossingGroundTruth[][9] = {
 	{ 26,0,71,503,131,0,106,503,199},
 	{ 27,0,138,503,151,0,179,503,193}
 };
+const int pedestrianCrossingGroundTruthSize = sizeof(pedestrianCrossingGroundTruth) / 
+											  sizeof(pedestrianCrossingGroundTruth[0]);
 
 const Scalar WHITE = Scalar(255, 255, 255);
 const Scalar BLUE = Scalar(255, 0, 0);
@@ -48,21 +49,25 @@ const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;  // tested for optimal value
 
 Mat getGroundTruth(int imageIndex, Mat originalImage) {
 	Mat groundTruthImage = originalImage.clone();
-#if !TEST
-	Point * points = new Point[4];
+	for (int i = 0; i < pedestrianCrossingGroundTruthSize; i++) {
+		if (pedestrianCrossingGroundTruth[i][0] == imageIndex) {
+			Point * points = new Point[4];
 	
-	// init points
-	for (int i = 1; i < 5; i++) {
-		points[i-1] = Point(pedestrianCrossingGroundTruth[imageIndex-10][(i*2)-1], 
-							pedestrianCrossingGroundTruth[imageIndex-10][i*2]);
-	}
+			// init points
+			for (int i = 1; i < 5; i++) {
+				points[i-1] = Point(pedestrianCrossingGroundTruth[imageIndex-10][(i*2)-1], 
+									pedestrianCrossingGroundTruth[imageIndex-10][i*2]);
+			}
 
-	// Draw lines
-	line(groundTruthImage, points[0], points[1], GREEN, 2);
-	line(groundTruthImage, points[0], points[2], GREEN, 2);
-	line(groundTruthImage, points[1], points[3], GREEN, 2);
-	line(groundTruthImage, points[2], points[3], GREEN, 2);
-#endif
+			// Draw lines
+			line(groundTruthImage, points[0], points[1], GREEN, 2);
+			line(groundTruthImage, points[0], points[2], GREEN, 2);
+			line(groundTruthImage, points[1], points[3], GREEN, 2);
+			line(groundTruthImage, points[2], points[3], GREEN, 2);
+
+			i = pedestrianCrossingGroundTruthSize; // end loop
+		}
+	}
 	return groundTruthImage;
 }
 
@@ -146,17 +151,11 @@ Mat closing(Mat image) {
 void MyApplication() {
 	// 	get the image
 	char* fileLocation = "../Media/";
-#if TEST
-	for (int imageIndex = 1; imageIndex <= 11; imageIndex++) {
-		// Get the original image
-		char filename[200];
-		sprintf(filename, "test-%d.jpg", imageIndex);
-#else
-	for (int imageIndex = 10; imageIndex <= 19; imageIndex++) {
+	for (int imageIndex = 10; imageIndex <= 29; imageIndex++) {
 		// Get the original image
 		char filename[200];
 		sprintf(filename, "PC%d.jpg", imageIndex);
-#endif
+
 		string file(fileLocation);
 		file.append(filename);
 		Mat originalImage;
