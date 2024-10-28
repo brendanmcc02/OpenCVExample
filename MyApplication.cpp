@@ -1,6 +1,5 @@
 #include "Utilities.h"
 #include <list>
-#define DEBUG false
 // Ground truth for pedestrian crossings.  Each row contains
 // 1. the image number (PC?.jpg)
 // 2. the coordinates of the line at the top of the pedestrian crossing (left column, left row, right column, right row)
@@ -151,6 +150,7 @@ Mat closing(Mat image) {
 void MyApplication() {
 	// 	get the image
 	char* fileLocation = "../Media/";
+	// TODO TEMP
 	for (int imageIndex = 10; imageIndex <= 29; imageIndex++) {
 		// Get the original image
 		char filename[200];
@@ -318,17 +318,9 @@ void MyApplication() {
 		// Find the longest linear sequence amongst the potential pedestrian crossings
 		int maxCount = 2;
 		float minAngleSum = 181.0;
-#if DEBUG
-		Mat debugImage;
-#endif
 		vector<int> maxPotentialCrossings(0);
 		for (int i = 0; i < closeConvexHullsLength - 2; i++) {
 			for (int j = i+1; j < closeConvexHullsLength - 1; j++) {
-#if DEBUG
-				debugImage = originalImage.clone();
-				circle(debugImage, potentialCrossingsCenters[i], 3, BLUE, -1);
-				circle(debugImage, potentialCrossingsCenters[j], 3, BLUE, -1);
-#endif
 				int count = 2;
 				float angleSum = 0.0;
 				vector<int> potentialCrossings = {closeConvexHulls[i], closeConvexHulls[j]};
@@ -339,11 +331,6 @@ void MyApplication() {
 					// calculate the angle between a horizontal line, and a line going through the centers of the crossing
 					float horizontalAngle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[k], 
 														  HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
-#if DEBUG
-					waitKey();
-					circle(debugImage, potentialCrossingsCenters[k], 3, Scalar(0, 0, 255), -1);
-					imshow("Debug", debugImage);
-#endif
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
@@ -353,11 +340,6 @@ void MyApplication() {
 					}
 
 					if (angle <= LINE_DEGREES_THRESHOLD && horizontalAngle <= HORIZONTAL_ANGLE_THRESHOLD) {
-#if DEBUG
-						waitKey();
-						circle(debugImage, potentialCrossingsCenters[k], 3, BLUE, -1);
-						imshow("Debug", debugImage);
-#endif
 						count++;
 						angleSum += angle;
 						potentialCrossings.push_back(closeConvexHulls[k]);
