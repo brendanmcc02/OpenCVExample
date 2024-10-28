@@ -46,27 +46,39 @@ const float WHITE_COLOR_DISTANCE_THRESHOLD = 150.0;  // tested for optimal value
 const float LINE_DEGREES_THRESHOLD = 8.0;  // train: 5.0
 const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;  // tested for optimal value
 
-Mat getGroundTruth(int imageIndex, Mat originalImage) {
-	Mat groundTruthImage = originalImage.clone();
+vector<Point> getGroundTruthPoints(int imageIndex) {
+	vector<Point> groundTruthPoints;
 	for (int i = 0; i < pedestrianCrossingGroundTruthSize; i++) {
 		if (pedestrianCrossingGroundTruth[i][0] == imageIndex) {
-			Point * points = new Point[4];
-	
 			// init points
 			for (int j = 1; j < 5; j++) {
-				points[j-1] = Point(pedestrianCrossingGroundTruth[i][(j*2)-1], 
-									pedestrianCrossingGroundTruth[i][j*2]);
+				groundTruthPoints.push_back(Point(pedestrianCrossingGroundTruth[i][(j*2)-1], 
+									pedestrianCrossingGroundTruth[i][j*2]));
 			}
-
-			// Draw lines
-			line(groundTruthImage, points[0], points[1], GREEN, 2);
-			line(groundTruthImage, points[0], points[2], GREEN, 2);
-			line(groundTruthImage, points[1], points[3], GREEN, 2);
-			line(groundTruthImage, points[2], points[3], GREEN, 2);
 
 			i = pedestrianCrossingGroundTruthSize; // end loop
 		}
 	}
+
+	return groundTruthPoints;
+}
+
+Mat getGroundTruthImage(int imageIndex, Mat originalImage, vector<Point> groundTruthPoints) {
+	Mat groundTruthImage = originalImage.clone();
+
+	for (int i = 0; i < pedestrianCrossingGroundTruthSize; i++) {
+		if (pedestrianCrossingGroundTruth[i][0] == imageIndex) {
+	
+			// Draw lines
+			line(groundTruthImage, groundTruthPoints[0], groundTruthPoints[1], GREEN, 2);
+			line(groundTruthImage, groundTruthPoints[0], groundTruthPoints[2], GREEN, 2);
+			line(groundTruthImage, groundTruthPoints[1], groundTruthPoints[3], GREEN, 2);
+			line(groundTruthImage, groundTruthPoints[2], groundTruthPoints[3], GREEN, 2);
+
+			i = pedestrianCrossingGroundTruthSize; // end loop
+		}
+	}
+
 	return groundTruthImage;
 }
 
@@ -163,7 +175,8 @@ void MyApplication() {
 		const Size originalImageSize = originalImage.size();
 		const Point HORIZONTAL_LINE_1 = Point(0.0, originalImageSize.height/2.0);
 		const Point HORIZONTAL_LINE_2 = Point(originalImageSize.width, originalImageSize.height/2.0);
-		Mat groundTruthImage = getGroundTruth(imageIndex, originalImage);
+		vector<Point> groundTruthPoints = getGroundTruthPoints(imageIndex);
+		Mat groundTruthImage = getGroundTruthImage(imageIndex, originalImage, groundTruthPoints);
 
 		// Iterative Median smoothing
 		Mat smoothedImage = smoothing(originalImage);
@@ -370,8 +383,8 @@ void MyApplication() {
 			}
 		}
 
-		// draw the potential pedestrian crossings
 		int maxPotentialCrossingLength = maxPotentialCrossings.size();
+		// draw the potential pedestrian crossings		
 		Mat pedestrianCrossingImage = Mat::zeros(originalImageSize, CV_8UC3);
 		for (int i = 0; i < maxPotentialCrossingLength; i++) {
 			drawContours(pedestrianCrossingImage, convexHullsUnfiltered, maxPotentialCrossings[i], GREEN, 2);
@@ -379,61 +392,88 @@ void MyApplication() {
 
 		imshow("Stage 4", pedestrianCrossingImage);
 
-		// find the min & max y-coordinate out of all the pedestrian crossings
-		int minY = originalImageSize.height;
-		int minX = 0;
-		int maxY = 0;
-		int maxX = 0;
-		for (int i = 0; i < maxPotentialCrossingLength; i++) {
-			for (Point point : convexHullsUnfiltered[maxPotentialCrossings[i]]) {
-				
-				int y = point.y;
-				if (y < minY) {
-					minY = y;
-					minX = point.x;
-				}
-
-				if (y > maxY) {
-					maxY = y;
-					maxX = point.x;
-				}
-			}
+		bool foundCrossing = false;
+		if (maxPotentialCrossingLength >= 3) {
+			foundCrossing = true;
 		}
 
-		// get the average slope of the lines going through the centers of the pedestrian crossings
-		float slopeTotal = 0.0;
-		int slopeCount = 0;
-		for (int i = 0; i < maxPotentialCrossingLength - 1; i++) {
-			for (int j = i + 1; j < maxPotentialCrossingLength; j++) {
-				Moments m1 = moments(convexHullsUnfiltered[maxPotentialCrossings[i]]);
-				int centerX_1 = m1.m10 / m1.m00;
-				int centerY_1 = m1.m01 / m1.m00;
-				Moments m2 = moments(convexHullsUnfiltered[maxPotentialCrossings[j]]);
-				int centerX_2 = m2.m10 / m2.m00;
-				int centerY_2 = m2.m01 / m2.m00;
-				slopeTotal += (float)(centerY_2 - centerY_1) / (float)(centerX_2 - centerX_1);
-				slopeCount++;
-			}
-		}
-
-		float meanSlope = slopeTotal / slopeCount;
-
-		// draw the enclosing box
 		Mat predictedImage = originalImage.clone();
-		int width = originalImageSize.width - 1;
-		float intercept = maxY - (meanSlope * maxX);
-		Point bottomLeft = Point(0, intercept);
-		Point bottomRight = Point(width, (meanSlope * width) + intercept);
-		intercept = minY - (meanSlope * minX);
-		Point topLeft = Point(0, intercept);
-		Point topRight = Point(width, (meanSlope * width) + intercept);
-		line(predictedImage, bottomLeft, bottomRight, BLUE, 2);
-		line(predictedImage, topLeft, topRight, BLUE, 2);
-		line(predictedImage, topLeft, bottomLeft, BLUE, 2);
-		line(predictedImage, topRight, bottomRight, BLUE, 2);
+		Point bottomLeft;
+		Point bottomRight;
+		Point topLeft;
+		Point topRight;
+		if (foundCrossing) {
+			// find the min & max y-coordinate out of all the pedestrian crossings
+			int minY = originalImageSize.height;
+			int minX = 0;
+			int maxY = 0;
+			int maxX = 0;
+			for (int i = 0; i < maxPotentialCrossingLength; i++) {
+				for (Point point : convexHullsUnfiltered[maxPotentialCrossings[i]]) {
+					
+					int y = point.y;
+					if (y < minY) {
+						minY = y;
+						minX = point.x;
+					}
+
+					if (y > maxY) {
+						maxY = y;
+						maxX = point.x;
+					}
+				}
+			}
+
+			// get the average slope of the lines going through the centers of the pedestrian crossings
+			float slopeTotal = 0.0;
+			int slopeCount = 0;
+			for (int i = 0; i < maxPotentialCrossingLength - 1; i++) {
+				for (int j = i + 1; j < maxPotentialCrossingLength; j++) {
+					Moments m1 = moments(convexHullsUnfiltered[maxPotentialCrossings[i]]);
+					int centerX_1 = m1.m10 / m1.m00;
+					int centerY_1 = m1.m01 / m1.m00;
+					Moments m2 = moments(convexHullsUnfiltered[maxPotentialCrossings[j]]);
+					int centerX_2 = m2.m10 / m2.m00;
+					int centerY_2 = m2.m01 / m2.m00;
+					slopeTotal += (float)(centerY_2 - centerY_1) / (float)(centerX_2 - centerX_1);
+					slopeCount++;
+				}
+			}
+
+			float meanSlope = slopeTotal / slopeCount;
+
+			// draw the enclosing box
+			int width = originalImageSize.width - 1;
+			float intercept = maxY - (meanSlope * maxX);
+			bottomLeft = Point(0, intercept);
+			bottomRight = Point(width, (meanSlope * width) + intercept);
+			intercept = minY - (meanSlope * minX);
+			topLeft = Point(0, intercept);
+			topRight = Point(width, (meanSlope * width) + intercept);
+			line(predictedImage, bottomLeft, bottomRight, BLUE, 2);
+			line(predictedImage, topLeft, topRight, BLUE, 2);
+			line(predictedImage, topLeft, bottomLeft, BLUE, 2);
+			line(predictedImage, topRight, bottomRight, BLUE, 2);
+		}
 
 		Mat output = JoinImagesHorizontally(groundTruthImage, "Original", predictedImage, "Predicted");
 		imshow("Final Output", output);
+
+		if (foundCrossing) {
+			vector<Point> predictedPoints = {bottomLeft, bottomRight, topLeft, topRight};
+			vector<Point> groundTruthConvexHull, predictedConvexHull;
+			convexHull(groundTruthPoints, groundTruthConvexHull);
+			convexHull(predictedPoints, predictedConvexHull);
+
+			vector<Point> intersection;
+			double intersectionArea = intersectConvexConvex(groundTruthConvexHull, predictedConvexHull, intersection);
+			double groundTruthArea = contourArea(groundTruthConvexHull);
+			double predictedArea = contourArea(predictedConvexHull);
+			double unionArea = groundTruthArea + predictedArea - intersectionArea;
+			double iou = intersectionArea / unionArea;
+			iou = ceil(iou * 100.0);
+			cout << "IoU:" << iou << "%\n";
+		}
 
 		// go to next image
 		waitKey();

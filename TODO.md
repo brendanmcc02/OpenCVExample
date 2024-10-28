@@ -22,6 +22,7 @@
 - [x] for linear sequences that tie for max, pick the straightest one
 - [x] bullet-proof against vertical crossings
 - [x] draw predicted box
+- [ ] report on results
 
 ## Other
 
