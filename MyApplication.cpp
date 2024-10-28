@@ -145,7 +145,7 @@ Mat closing(Mat image) {
 
 void MyApplication() {
 	// 	get the image
-	char* fileLocation = "../media/";
+	char* fileLocation = "../Media/";
 #if TEST
 	for (int imageIndex = 1; imageIndex <= 11; imageIndex++) {
 		// Get the original image
