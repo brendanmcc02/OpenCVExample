@@ -117,6 +117,7 @@ double angleBetweenLines(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
 
 Mat smoothing(Mat originalImage) {
 	Mat smoothedImage;
+	// Median
 	Mat* medianImages = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
 	medianImages[0] = originalImage;
 
