@@ -398,6 +398,8 @@ void MyApplication() {
 			foundCrossing = true;
 		}
 
+		Mat predictedImage = originalImage.clone();
+		Mat output_image = groundTruthImage.clone();
 		Point bottomLeft;
 		Point bottomRight;
 		Point topLeft;
@@ -450,13 +452,19 @@ void MyApplication() {
 			intercept = minY - (meanSlope * minX);
 			topLeft = Point(0, intercept);
 			topRight = Point(width, (meanSlope * width) + intercept);
-			line(groundTruthImage, bottomLeft, bottomRight, BLUE, 2);
-			line(groundTruthImage, topLeft, topRight, BLUE, 2);
-			line(groundTruthImage, topLeft, bottomLeft, BLUE, 2);
-			line(groundTruthImage, topRight, bottomRight, BLUE, 2);
+			line(predictedImage, bottomLeft, bottomRight, BLUE, 2);
+			line(predictedImage, topLeft, topRight, BLUE, 2);
+			line(predictedImage, topLeft, bottomLeft, BLUE, 2);
+			line(predictedImage, topRight, bottomRight, BLUE, 2);
+			line(output_image, bottomLeft, bottomRight, BLUE, 2);
+			line(output_image, topLeft, topRight, BLUE, 2);
+			line(output_image, topLeft, bottomLeft, BLUE, 2);
+			line(output_image, topRight, bottomRight, BLUE, 2);
 		}
 
-		imshow("Final Output", groundTruthImage);
+		Mat output7 = JoinImagesHorizontally(groundTruthImage, "Ground Truth", predictedImage, "Predicted");
+		Mat output8 = JoinImagesHorizontally(output7, "", output_image, "Combined");
+		imshow("Output", output8);
 
 		if (foundCrossing) {
 			vector<Point> predictedPoints = {bottomLeft, bottomRight, topLeft, topRight};
@@ -471,7 +479,7 @@ void MyApplication() {
 			double unionArea = groundTruthArea + predictedArea - intersectionArea;
 			double iou = intersectionArea / unionArea;
 			iou = ceil(iou * 100.0);
-			cout << "IoU:" << iou << "%\n";
+			cout << imageIndex << ": IoU = " << iou << "%\n";
 		}
 
 		// go to next image
