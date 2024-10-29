@@ -1,5 +1,8 @@
 #include "Utilities.h"
 #include <list>
+
+#define _CRT_SECURE_NO_WARNINGS
+
 // Ground truth for pedestrian crossings.  Each row contains
 // 1. the image number (PC?.jpg)
 // 2. the coordinates of the line at the top of the pedestrian crossing (left column, left row, right column, right row)
@@ -162,7 +165,8 @@ Mat closing(Mat image) {
 
 void MyApplication() {
 	// 	get the image
-	char* fileLocation = "../Media/";
+	// char* fileLocation = "../Media/";
+	char* fileLocation = "Media/";
 	// TODO TEMP
 	for (int imageIndex = 10; imageIndex <= 29; imageIndex++) {
 		// Get the original image
