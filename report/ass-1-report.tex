@@ -3,6 +3,7 @@
 \usepackage{graphicx}  % for images
 \usepackage[T1]{fontenc}
 \usepackage{float}  % used for image positioning, very handy.
+\usepackage{gensymb} % has the degree symbol
 
 \begin{document}
 	
@@ -16,7 +17,7 @@
 	
 	\section*{Introduction}
 	
-	The goal of this assignment is to detect pedestrian crossings in images taken from a car's point of view. Firstly, I will describe in depth the theory behind my process, and then present results and analyse both successes and failures.
+	The goal of this assignment is to detect pedestrian crossings in images. It is assumed they are taken from a car's point of view. Firstly, I will describe the theory behind my process, and then present results and analyse both successes and failures.
 	
 	\section{Theory of the Processing}
 	
@@ -24,19 +25,21 @@
 	
 	To help cope with noise, all my images went through an initial stage of smoothing. In the context of this problem, it was crucial that the edges of the pedestrian crossings remained well-defined and as sharp as possible. The reason for this is because I wanted my edge detection to work as good as possible. As a result, I settled with \textbf{median smoothing}, primarily because it does not blur edges too much.
 	
-	I experimented with multiple iterations of median smoothing, however I found the best results with just one iteration. Additionally, I opted for a filter size of 3x3 as I wanted the edges to be as sharp as possible. With larger filter sizes, I was worried it would corrupt the image too much and deviate too far from the original.
-	
 	\subsection{Edge Detection}
 	
 	At first, I experimented with region processing using Mean Shift Segmentation (MSS). However, I found that it took a about two seconds to process the image using MSS. In the context of the problem, I opted for a more efficient approach as it is vital that images are produced rapidly in a car imaging system. This is how I settled with edge processing.
 	
 	I chose to go with \textbf{Canny Edge Detection} as opposed to Boundary Chain Codes, because with Canny I could have more customisation over the results by changing the parameters, whereas with Boundary Chain Codes it was more limiting.
 	
-	The low and high thresholds were chosen mostly based on trial-and-error. I ensured that my low threshold value was conservative, as this is indicative of the number of contours detected by Canny, and I wanted to be sure that my edge detection would not miss out on any potential pedestrian crossings.
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.3]{smoothing-edge-detection}
+		\caption{Median Smoothing \& Canny Edge Detection. I experimented with multiple iterations of median smoothing, however I found the best results with just one iteration. Additionally, I opted for a filter size of 3x3 as I wanted the edges to be as sharp as possible. With larger filter sizes, I was worried it would corrupt the image too much and deviate too far from the original. For the edge detection, the low and high thresholds were chosen mostly based on trial-and-error. I ensured that my low threshold value was conservative, as this is indicative of the number of contours detected by Canny, and I wanted to be sure that my edge detection would not miss out on any potential pedestrian crossings.}
+	\end{figure}
 	
 	\subsection{Binary Thresholding}
 	
-	The output of the previous step in the process was an RGB multispectral image, and I wanted a binary image to simplify things further. I used \textbf{Otsu Thresholding} to convert to binary, followed by a closing operation. This was done to fill any potential gaps in the edges of pedestrian crossings. From some trial-and-error testing, I found a kernel size of 2 to be optimal for my process.
+	The output of the previous step in the process was an RGB multispectral image, and I wanted a binary image to simplify things further. I used \textbf{Otsu Thresholding} to convert to binary, followed by a closing operation.
 	
 	\subsection{Connected Components Analysis and Shape Analysis}
 	
@@ -56,7 +59,7 @@
 		\begin{itemize}
 			\item $500 <= $ Convex Hull Area $ <= 3500$
 		\end{itemize}
-		\item Convex Hulls were filtered by rectangularity.
+		\item Convex Hulls were then filtered by rectangularity.
 		\begin{itemize}
 			\item Rectangularity $>= 0.5$
 		\end{itemize}
@@ -64,9 +67,62 @@
 	
 	After going through this filtering process, we now have a list of filtered convex hulls that potentially identify as pedestrian crossings.
 	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.3]{thresholding-cca}
+		\caption{Left-to-Right: Otsu Thresholding, Closing, CCA \& Shape Analysis. The closing operation was done to fill any potential gaps in the edges of pedestrian crossings. This would yield better results for CCA. From some trial-and-error testing, I found a closing kernel size of 2 to be optimal for my process.}
+	\end{figure}
+
 	\subsection{Colour}
 	
 	One distinctive trait of pedestrian crossings are it's white-ish colour. For each filtered convex hull, the mean colour of the convex hull is calculated. This RGB value is compared to the white RGB value by calculating the Euclidean distance between the two 3D vectors. From trial-and-error testing, I found $150.0$ to be a forgiving value, but with good results.
+	
+	\subsection{Filtering out isolated Convex Hulls}
+	
+	Another distinctive trait of pedestrian crossings is that they are positioned relatively close together. In this step of the process I wanted to filter out convex hulls that were isolated and had no neighbours - likely these are not pedestrian crossings because otherwise they would have neighbours.
+	
+	This was achieved by finding the centre points of each convex hull and calculating its distance to the other convex hulls. If it had no convex hull within a distance of $175$ (found through testing), it was filtered out.
+	
+	Some convex hulls were overlapping with each other, so these were filtered out by introducing a minimum distance value of $10$.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.3]{white-isolated}
+		\caption{Left-to-right: Convex Hulls, White Regions, Filtering out isolated convex hulls. We can see the centre image has filtered out the van region in the top-right of the image because my process has deemed it is not white enough in colour to be determined as a pedestrian crossing. In the right image we can observe the leaves in the bottom right corner have been filtered out as they have no nearby neighbours. If you look closely at the pedestrian crossings, we can observe that overlapping edges have also been filtered out.}
+	\end{figure}
+	
+	\subsection{Finding the longest linear sequence}
+	
+	A key trait of pedestrian crossings is that they occur in a straight line. The aim of this step was to determine the longest linear sequence among the potential pedestrian crossings. This was achieved with a brute-force approach - in reality, there will only be a handful of potential pedestrian crossings so any efficiency improvements would be negligible.
+	
+	A line is drawn from the centre of one convex hull to a second convex hull. Then, another line is drawn from the second convex hull to a third convex hull. If the angle between these two lines is less than $8$\textdegree, it is deemed in a straight line and the algorithm continues to find other convex hulls that also lie within this threshold. This is repeated for every possible combination of convex hulls, and then the longest linear sequence is obtained.
+	
+	\subsubsection*{Additional Heuristics}
+	
+	\begin{itemize}
+		\item If there is a tie for the longest sequence, my algorithm will choose the linear sequence that is 'straighter'.
+		\item A linear sequence must be within a $30$\textdegree angle to a horizontal line. This was done to prevent road markings from being classified as pedestrian crossings as they often run vertically on the screen.
+		\item A linear sequence must be of length $>= 3$ to be considered a pedestrian crossing.
+		\item My algorithm will only return one potential pedestrian crossing. If there are multiple pedestrian crossings in the image, it will choose the longer one.
+	\end{itemize}
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.3]{linear}
+		\caption{Longest Linear Sequence. My algorithm has determined all $5$ convex hulls to be in a relatively straight line to each other.}
+	\end{figure}
+	
+	\subsection{Drawing the Bounding Box}
+	
+	If a pedestrian crossing was identified, the bounding box must be drawn around it to compare with the ground truth.
+	
+	Various straight lines were drawn through the centres of the pedestrian crossings and the mean slope was calculated. The top edge of the bounding box would be drawn through the maximum y-coordinate with this mean slope, and the bottom edge of the bounding box would be drawn through the minimum y-coordinate with this mean slope.
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.3]{box}
+		\caption{Drawing the bounding box.}
+	\end{figure}
 	
 	\newpage
 	\section{Results and Analysis}

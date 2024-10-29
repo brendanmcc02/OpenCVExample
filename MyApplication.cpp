@@ -384,9 +384,9 @@ void MyApplication() {
 			}
 		}
 
-		int maxPotentialCrossingLength = maxPotentialCrossings.size();
-		// draw the potential pedestrian crossings		
+		// draw the potential pedestrian crossings
 		Mat pedestrianCrossingImage = Mat::zeros(originalImageSize, CV_8UC3);
+		int maxPotentialCrossingLength = maxPotentialCrossings.size();
 		for (int i = 0; i < maxPotentialCrossingLength; i++) {
 			drawContours(pedestrianCrossingImage, convexHullsUnfiltered, maxPotentialCrossings[i], GREEN, 2);
 		}
@@ -398,7 +398,6 @@ void MyApplication() {
 			foundCrossing = true;
 		}
 
-		Mat predictedImage = originalImage.clone();
 		Point bottomLeft;
 		Point bottomRight;
 		Point topLeft;
@@ -451,14 +450,13 @@ void MyApplication() {
 			intercept = minY - (meanSlope * minX);
 			topLeft = Point(0, intercept);
 			topRight = Point(width, (meanSlope * width) + intercept);
-			line(predictedImage, bottomLeft, bottomRight, BLUE, 2);
-			line(predictedImage, topLeft, topRight, BLUE, 2);
-			line(predictedImage, topLeft, bottomLeft, BLUE, 2);
-			line(predictedImage, topRight, bottomRight, BLUE, 2);
+			line(groundTruthImage, bottomLeft, bottomRight, BLUE, 2);
+			line(groundTruthImage, topLeft, topRight, BLUE, 2);
+			line(groundTruthImage, topLeft, bottomLeft, BLUE, 2);
+			line(groundTruthImage, topRight, bottomRight, BLUE, 2);
 		}
 
-		Mat output = JoinImagesHorizontally(groundTruthImage, "Original", predictedImage, "Predicted");
-		imshow("Final Output", output);
+		imshow("Final Output", groundTruthImage);
 
 		if (foundCrossing) {
 			vector<Point> predictedPoints = {bottomLeft, bottomRight, topLeft, topRight};
