@@ -127,20 +127,15 @@
 	\newpage
 	\section{Results and Analysis}
 	
-	\section*{Conclusion}
+	\subsection*{Performance Metric}
+	
+	Seeing as this is an object detection problem, it made sense to use Intersection over Union (IoU) as my performance metric.
+	
+	\[ IoU = \frac{Predicted \cap Ground Truth}{Predicted \cup Ground Truth} = \frac{IntersectionArea}{GroundTruthArea + PredictedArea - IntersectionArea} \]
+	
+	The $IntersectionArea$ was calculated using the \verb|intersectConvexConvex| method. The $GroundTruthArea$ and $PredictedArea$ were calculated using the \verb|contourArea| method.
+	
+	Following from the advice in the lectures, an IoU value over $50\%$ is considered a good match.
+	
+	%\section*{Conclusion}
 \end{document}
-
-%\begin{itemize}
-%	\item[(a)] Can customize lists
-%	\item or just use bullet points
-%\end{itemize}
-
-%\begin{figure}[H]
-	%\centering
-	% \includegraphics[scale=0.5]{image-file} 
-%	\caption{Caption here. The H means to place the image as close as possible to where it shows up in the code.}
-%\end{figure}
-
-%\begin{small}
-%	You can also have different text sizes. Could come in handy.
-%\end{small}
