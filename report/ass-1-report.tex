@@ -97,7 +97,7 @@
 	
 	\begin{itemize}
 		\item If there is a tie for the longest sequence, my algorithm will choose the linear sequence that is 'straighter'.
-		\item A linear sequence must be within a $30$\textdegree angle to a horizontal line. This was done to prevent road markings from being classified as pedestrian crossings as they often run vertically on the screen.
+		\item A linear sequence must be within a $30$\textdegree $\;$angle to a horizontal line. This was done to prevent road markings from being classified as pedestrian crossings as they often run vertically on the screen.
 		\item A linear sequence must be of length $>= 3$ to be considered a pedestrian crossing.
 		\item My algorithm will only return one potential pedestrian crossing. If there are multiple pedestrian crossings in the image, it will choose the longer one.
 	\end{itemize}
@@ -139,8 +139,8 @@
 	% 16: diagonal + small
 	% 18: sloped + damaged crosswalk
 	% 21: close call (IoU 50%)
-	% 27: varying shapes (triangular one)
 	% 28: road markings (better to do this than 20 as its test)
+	% 27: varying shapes (triangular one)
 	
 	% failures:
 	% 22: not predicted at all
@@ -148,8 +148,13 @@
 	
 	\begin{figure}[H]
 		\centering
-		\includegraphics[scale=0.2]{10}
-		\caption{The algorithm performs very well with IoU scores of $87\%$, $73\%$, $90\%$, $88\%$, $88\%$, $86\%$, $78\%$, $89\%$ respectively.}
+		\includegraphics[scale=0.2]{16-alt}
+		\includegraphics[scale=0.2]{18-alt}
+		\includegraphics[scale=0.2]{20-alt}
+		\includegraphics[scale=0.2]{27-alt}
+		\includegraphics[scale=0.2]{28}
+		\caption{\newline Image 1: We can observe that even if all individual crossings are not captured, the bounding box gets extended to capture the entire crossing.\newline Image 2: Despite some worn-down and sloped crossings, all are identified.\newline Image 3: \newline Image 4:\newline Image 5: Road markings are not identified as crossings because they exceed my $30$\textdegree $\;$horizontal angle threshold.
+		}
 	\end{figure}
 	
 	\subsection{Failures}

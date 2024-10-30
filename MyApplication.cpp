@@ -466,8 +466,8 @@ void MyApplication() {
 			line(combined_image, topRight, bottomRight, BLUE, 2);
 		}
 
-		// Mat output7 = JoinImagesHorizontally(groundTruthImage, "Ground Truth", predictedImage, "Predicted");
-		Mat output7 = JoinImagesHorizontally(pedestrianCrossingImage, "Longest Linear Sequence", groundTruthImage, "Ground Truth");
+		// Mat output7 = JoinImagesHorizontally(pedestrianCrossingImage, "Longest Linear Sequence", groundTruthImage, "Ground Truth");
+		Mat output7 = JoinImagesHorizontally(contoursImage, "Longest Linear Sequence", groundTruthImage, "Ground Truth");
 		Mat output8 = JoinImagesHorizontally(predictedImage, "Predicted", combined_image, "Combined");
 		Mat outputImage = JoinImagesVertically(output7, "", output8, "");
 		imshow("Output", outputImage);
