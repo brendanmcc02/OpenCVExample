@@ -1,7 +1,7 @@
 #include "Utilities.h"
 #include <list>
 
-#define CUSTOM_TEST_IMAGES true
+#define CUSTOM_TEST_IMAGES false
 #define _CRT_SECURE_NO_WARNINGS
 
 // Ground truth for pedestrian crossings.  Each row contains

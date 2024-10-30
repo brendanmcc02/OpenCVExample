@@ -14,3 +14,23 @@
 25: IoU = 75%
 26: IoU = 85%
 27: IoU = 97%
+
+## After changing max threshold size
+
+10: IoU = 87%
+11: IoU = 73%
+12: IoU = 90%
+13: IoU = 88%
+14: IoU = 88%
+15: IoU = 86%
+16: IoU = 78%
+17: IoU = 89%
+18: IoU = 84%
+20: IoU = 77%
+21: IoU = 93%
+22: IoU = 85%
+23: IoU = 94%
+24: IoU = 72%
+25: IoU = 75%
+26: IoU = 85%
+27: IoU = 97%

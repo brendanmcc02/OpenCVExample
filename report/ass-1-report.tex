@@ -69,7 +69,7 @@
 		\caption{Left-to-Right: Otsu Thresholding, Closing, CCA \& Shape Analysis. The closing operation was done to fill any potential gaps in the edges of pedestrian crossings. This would yield better results for CCA. From some trial-and-error testing, I found a closing kernel size of 2 to be optimal for my process.}
 	\end{figure}
 
-	\subsection{Colour}
+	\subsection{Colour Comparison}
 	
 	One distinctive trait of pedestrian crossings are it's white-ish colour. For each filtered convex hull, the mean colour of the convex hull is calculated. This RGB value is compared to the white RGB value by calculating the Euclidean distance between the two 3D vectors. From trial-and-error testing, I found $150.0$ to be a forgiving value, but with good results.
 	
@@ -87,7 +87,7 @@
 		\caption{Left-to-right: Convex Hulls, White Regions, Filtering out isolated convex hulls. We can see the centre image has filtered out the van region in the top-right of the image because my process has deemed it is not white enough in colour to be determined as a pedestrian crossing. In the right image we can observe the leaves in the bottom right corner have been filtered out as they have no nearby neighbours. If you look closely at the pedestrian crossings, we can observe that overlapping edges have also been filtered out.}
 	\end{figure}
 	
-	\subsection{Finding the longest linear sequence}
+	\subsection{Finding the longest linear sequence}\label{longest-linear-sequence}
 	
 	A key trait of pedestrian crossings is that they occur in a straight line. The aim of this step was to determine the longest linear sequence among the potential pedestrian crossings. This was achieved with a brute-force approach - in reality, there will only be a handful of potential pedestrian crossings so any efficiency improvements would be negligible.
 	
@@ -97,12 +97,11 @@
 	
 	\begin{itemize}
 		\item If there is a tie for the longest sequence, my algorithm will choose the linear sequence that is 'straighter'.
-		\item A linear sequence must be within a $30$\textdegree $\;$angle to a horizontal line. This was done to prevent road markings from being classified as pedestrian crossings as they often run vertically on the screen.
 		\item A linear sequence must be of length $>= 3$ to be considered a pedestrian crossing.
 		\item My algorithm will only return one potential pedestrian crossing. If there are multiple pedestrian crossings in the image, it will choose the longer one.
 	\end{itemize}
 	
-	\subsection{Drawing the Bounding Box}
+	\subsection{Drawing the Bounding Box}\label{bounding-box}
 	
 	If a pedestrian crossing was identified, the bounding box must be drawn around it to compare with the ground truth.
 	
@@ -117,49 +116,107 @@
 	
 	\section{Results and Analysis}
 	
-	\subsection*{Performance Metrics}
+	\subsection{Performance Metrics}
 	
-	Seeing as this is an object detection problem, it made sense to use Intersection over Union (IoU) as my performance metric.
+	Seeing as this is an object detection problem, it made sense to use Intersection over Union (IoU) and the F1 Score as my performance metrics.
 	
 	\[ IoU = \frac{Predicted \cap Ground\; Truth}{Predicted \cup Ground\; Truth} = \frac{Intersection\; Area}{Ground\; Truth\; Area + Predicted\; Area - Intersection\; Area} \]
 	
-	The $Intersection\; Area$ was calculated using the \verb|intersectConvexConvex| method. The $Ground\; Truth\; Area$ and $Predicted\; Area$ were calculated using the \verb|contourArea| method.
+	The $Intersection\; Area$ was calculated using the \verb|intersectConvexConvex| method. The $Ground\; Truth\; Area$ and $Predicted\; Area$ were calculated using the \verb|contourArea| method.\newline
 	
-	Following from the advice in the lectures, an IoU value over $50\%$ is considered a good match.\newline
-	
-	Additionally, the F1 score will be used in measuring my algorithm's performance based on both training and test data. For the sake of simplicity, an observed positive is when the IoU is over $50\%$. I chose to go with this metric as it integrates elements of both Precision and Recall.
+	Additionally, the F1 score will be used in measuring my algorithm's performance based on both training and test data. Following the advice from the lectures, a True Positive (TP) is when the IoU is over $50\%$. I chose to go with this metric as it integrates elements of both Precision and Recall.
 	
 	\[ F1\; Score = \frac{2*TP}{2*TP+FP+FN} \]
 	
-	\subsection{Successes}
+	For the 20 training \& test images, the F1 Score of my solution was 100\%, meaning it correctly identified all True Positives and True Negatives with no mistakes. The mean IoU across the True Positives was 84.76\%; the lowest value being 72\%. In my view, this is a strong result seeing as an IoU over 50\% is considered to be an observed positive.
+	
+	\newpage
+	\subsection{Presenting Visual Results}
 	
 	I will not be including all cases of successes (as many of them are trivial), only examples of significance. The green lines correspond to the Ground Truth, and blue lines correspond to my Prediction.
 	
-	% successes worth talking about:
-	% 16: diagonal + small
-	% 18: sloped + damaged crosswalk
-	% 21: close call (IoU 50%)
-	% 28: road markings (better to do this than 20 as its test)
-	% 27: varying shapes (triangular one)
-	
-	% failures:
-	% 22: not predicted at all
-	
-	
 	\begin{figure}[H]
-		\centering
-		\includegraphics[scale=0.2]{16-alt}
-		\includegraphics[scale=0.2]{18-alt}
-		\includegraphics[scale=0.2]{20-alt}
-		\includegraphics[scale=0.2]{27-alt}
-		\includegraphics[scale=0.2]{28}
-		\caption{\newline Image 1: We can observe that even if all individual crossings are not captured, the bounding box gets extended to capture the entire crossing.\newline Image 2: Despite some worn-down and sloped crossings, all are identified.\newline Image 3: \newline Image 4:\newline Image 5: Road markings are not identified as crossings because they exceed my $30$\textdegree $\;$horizontal angle threshold.
-		}
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{16-alt}
+			\caption{We can observe that even if all individual crossings are not captured, the bounding box gets extended to capture the entire crossing, demonstrating the robustness of the solution. This has it's limitations however, and will be discussed in another section. IoU=78\%.}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{18-alt}
+			\caption{Despite some worn-down crossings, all are identified. The colour distance threshold had to be tweaked to a forgiving value ($150$) to consider edge cases such as the above. This also has it's limitations and will be discussed in another section. IoU=84\%.}
+		\end{minipage}
 	\end{figure}
 	
-	\subsection{Failures}
+	\begin{figure}[H]
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{14-alt}
+			\caption{We can observe that the solution still identifies crossings far away at a small size. The minimum area threshold had to be tweaked to allow for this. I was unsure if I was over-fitting here, but my solution still worked well for the unseen test images. IoU=88\%.}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{13-alt}
+			\caption{Despite some other yellow road markings near the crossing, it does not effect the results of my solution. This is a result of resilient colour distancing and shape analysis. IoU=88\%.}
+		\end{minipage}
+	\end{figure}
 	
+	\newpage
 	\subsection{Robustness}
 	
-	%\section*{Conclusion}
+	\subsubsection{Spacing}
+	
+	A key feature of pedestrian crossings is that they are relatively evenly spaced. I was considering integrating this into my solution by examining the relative distance between each of the identified crossings, but I decided against it for two main reasons: 
+	\begin{enumerate}
+		\item The distance between the crossings would vary drastically due to perspective warping. This would be a very challenging obstacle to overcome.
+		\item If one of the crossings in the middle would fail to be identified - for example, it could be covered in leaves - it would collapse my solution and fail to recongise a crossing.
+	\end{enumerate}
+	
+	\subsubsection{Outlier Resilience}
+	
+	As mentioned in section \ref{longest-linear-sequence} \& \ref{bounding-box}, when checking for collinearity between the crossings, I allow for 8\textdegree $\;$deviation. Furthermore, the gradient of the bounding box is the mean slope between all the centroids of the identified crossings. This means that even when there is an outlier crossing, it will not significantly hurt the output of the solution. This is best demonstrated in Figure \ref{outlier-image} below.
+	
+	\begin{figure}[H]
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{24-alt}
+			\caption{Despite the solution failing to identify the crossing in the middle, it still recognises the other ones and since they remain in a linear sequence, it correctly identifies it as a pedestrian crossing. IoU=72\%.}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{20-alt}
+			\caption{Since the crossing on the right side is cut off, the centroid of that crossing is perceived incorrectly and the predicted bounding box is skewed. Despite this, my solution still works well in identifying the location of the crossing with an IoU of 77\%. While it's not perfect, it still performs well above 50\%.}
+			\label{outlier-image}
+		\end{minipage}
+	\end{figure}
+	
+	\subsection{Non-Pedestrian Crossing Images}
+	
+	I also wanted to consider cases where the images do not feature pedestrian crossings. Road markings were an obvious edge case - the key feature about those is that they run relatively vertical to the perspective of the camera, whereas pedestrian crossings run relatively horizontal to the camera.
+	
+	To counter this, I integrated a feature that compares the angle of the identified pedestrian crossing to a horizontal line - if it lies under 30\textdegree , then it is considered a pedestrian crossing. Otherwise, it is likely a road marking.
+	
+	\begin{figure}[H]
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{19-alt}
+			\caption{Despite identifying some potential candidates for crossings, they are rejected as they are deemed 'too vertical'.}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+		\centering
+		\includegraphics[scale=0.2]{28-alt}
+		\caption{The colour distancing does most of the heavy lifting on this one, but even if the markings were perfectly white, the horizontalness check would have rejected it.}
+		\end{minipage}
+	\end{figure}
+	
+	\subsection{Potential Limitations}
+	
+	\includegraphics[scale=0.2]{27-alt}
+	% talk about rectangularity and how its low, in future could do a perspective transformation and then calculate rectangularity that way, would mean I could have a stricter threshold that would result in less edge cases. 27 is a good example of triangle registering as crosswalk
+	
+	% color distance - bus lane for example
+	
+	% heavy reliance on 'magic numbers' and thresholds, could be a case of overfitting
+	
+	% could talk about night and include night test image
 \end{document}
