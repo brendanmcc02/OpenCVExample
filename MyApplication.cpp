@@ -391,13 +391,11 @@ void MyApplication() {
 		}
 
 		// draw the potential pedestrian crossings
-		Mat pedestrianCrossingImage = Mat::zeros(originalImageSize, CV_8UC3);
+		Mat pedestrianCrossingImage = originalImage.clone();
 		int maxPotentialCrossingLength = maxPotentialCrossings.size();
 		for (int i = 0; i < maxPotentialCrossingLength; i++) {
-			drawContours(pedestrianCrossingImage, convexHullsUnfiltered, maxPotentialCrossings[i], GREEN, 2);
+			drawContours(pedestrianCrossingImage, convexHullsUnfiltered, maxPotentialCrossings[i], BLUE, 2);
 		}
-
-		imshow("Stage 4", pedestrianCrossingImage);
 
 		bool foundCrossing = false;
 		if (maxPotentialCrossingLength >= 3) {
@@ -405,7 +403,7 @@ void MyApplication() {
 		}
 
 		Mat predictedImage = originalImage.clone();
-		Mat output_image = groundTruthImage.clone();
+		Mat combined_image = groundTruthImage.clone();
 		Point bottomLeft;
 		Point bottomRight;
 		Point topLeft;
@@ -462,15 +460,17 @@ void MyApplication() {
 			line(predictedImage, topLeft, topRight, BLUE, 2);
 			line(predictedImage, topLeft, bottomLeft, BLUE, 2);
 			line(predictedImage, topRight, bottomRight, BLUE, 2);
-			line(output_image, bottomLeft, bottomRight, BLUE, 2);
-			line(output_image, topLeft, topRight, BLUE, 2);
-			line(output_image, topLeft, bottomLeft, BLUE, 2);
-			line(output_image, topRight, bottomRight, BLUE, 2);
+			line(combined_image, bottomLeft, bottomRight, BLUE, 2);
+			line(combined_image, topLeft, topRight, BLUE, 2);
+			line(combined_image, topLeft, bottomLeft, BLUE, 2);
+			line(combined_image, topRight, bottomRight, BLUE, 2);
 		}
 
-		Mat output7 = JoinImagesHorizontally(groundTruthImage, "Ground Truth", predictedImage, "Predicted");
-		Mat output8 = JoinImagesHorizontally(output7, "", output_image, "Combined");
-		imshow("Output", output8);
+		// Mat output7 = JoinImagesHorizontally(groundTruthImage, "Ground Truth", predictedImage, "Predicted");
+		Mat output7 = JoinImagesHorizontally(pedestrianCrossingImage, "Longest Linear Sequence", groundTruthImage, "Ground Truth");
+		Mat output8 = JoinImagesHorizontally(predictedImage, "Predicted", combined_image, "Combined");
+		Mat outputImage = JoinImagesVertically(output7, "", output8, "");
+		imshow("Output", outputImage);
 
 		if (foundCrossing) {
 			vector<Point> predictedPoints = { bottomLeft, bottomRight, topLeft, topRight };
