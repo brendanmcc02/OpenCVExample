@@ -26,12 +26,12 @@ int pedestrianCrossingGroundTruth[][9] = {
 	{ 26,0,71,503,131,0,106,503,199},
 	{ 27,0,138,503,151,0,179,503,193}
 };
-const int pedestrianCrossingGroundTruthSize = sizeof(pedestrianCrossingGroundTruth) / 
-											  sizeof(pedestrianCrossingGroundTruth[0]);
+const int pedestrianCrossingGroundTruthSize = sizeof(pedestrianCrossingGroundTruth) /
+sizeof(pedestrianCrossingGroundTruth[0]);
 
 const Scalar WHITE = Scalar(255, 255, 255);
 const Scalar BLUE = Scalar(255, 0, 0);
-const Scalar GREEN  = Scalar(0, 255, 0);
+const Scalar GREEN = Scalar(0, 255, 0);
 const int NUM_MEDIAN_BLUR_ITERATIONS = 1;  // tested for optimal value
 const int MEDIAN_BLUR_FILTER_SIZE = 3;  // tested for optimal value
 const int CLOSING_KERNEL_SIZE = 2;  // tested for optimal value
@@ -55,8 +55,8 @@ vector<Point> getGroundTruthPoints(int imageIndex) {
 		if (pedestrianCrossingGroundTruth[i][0] == imageIndex) {
 			// init points
 			for (int j = 1; j < 5; j++) {
-				groundTruthPoints.push_back(Point(pedestrianCrossingGroundTruth[i][(j*2)-1], 
-												  pedestrianCrossingGroundTruth[i][j*2]));
+				groundTruthPoints.push_back(Point(pedestrianCrossingGroundTruth[i][(j * 2) - 1],
+					pedestrianCrossingGroundTruth[i][j * 2]));
 			}
 
 			i = pedestrianCrossingGroundTruthSize; // end loop
@@ -71,7 +71,7 @@ Mat getGroundTruthImage(int imageIndex, Mat originalImage, vector<Point> groundT
 
 	for (int i = 0; i < pedestrianCrossingGroundTruthSize; i++) {
 		if (pedestrianCrossingGroundTruth[i][0] == imageIndex) {
-	
+
 			// Draw lines
 			line(groundTruthImage, groundTruthPoints[0], groundTruthPoints[1], GREEN, 2);
 			line(groundTruthImage, groundTruthPoints[0], groundTruthPoints[2], GREEN, 2);
@@ -86,46 +86,47 @@ Mat getGroundTruthImage(int imageIndex, Mat originalImage, vector<Point> groundT
 }
 
 float getColorDistance(const Scalar& s1, const Scalar& s2) {
-    float dist = 0;
+	float dist = 0;
 
-    for (int i = 0; i < 3; ++i) {
-        dist += (s1[i] - s2[i]) * (s1[i] - s2[i]);
-    }
+	for (int i = 0; i < 3; ++i) {
+		dist += (s1[i] - s2[i]) * (s1[i] - s2[i]);
+	}
 
-    return sqrt(dist);
+	return sqrt(dist);
 }
 
 double angleBetweenLines(Point2f p1, Point2f p2, Point2f p3, Point2f p4) {
-    Point2f v1 = p2 - p1;
-    Point2f v2 = p4 - p3;
-    
-    double dotProduct = v1.x * v2.x + v1.y * v2.y;
-    double magV1 = sqrt(v1.x * v1.x + v1.y * v1.y);
-    double magV2 = sqrt(v2.x * v2.x + v2.y * v2.y);
-    double cosTheta = dotProduct / (magV1 * magV2);
-    
-    // avoid floating-point precision errors
-    if (cosTheta > 1.0) {
+	Point2f v1 = p2 - p1;
+	Point2f v2 = p4 - p3;
+
+	double dotProduct = v1.x * v2.x + v1.y * v2.y;
+	double magV1 = sqrt(v1.x * v1.x + v1.y * v1.y);
+	double magV2 = sqrt(v2.x * v2.x + v2.y * v2.y);
+	double cosTheta = dotProduct / (magV1 * magV2);
+
+	// avoid floating-point precision errors
+	if (cosTheta > 1.0) {
 		cosTheta = 1.0;
-	} else if (cosTheta < -1.0) {
+	}
+	else if (cosTheta < -1.0) {
 		cosTheta = -1.0;
 	}
-    
-    // Calculate the angle in radians and then convert to degrees
-    double angleInRadians = acos(cosTheta);
-    double angleInDegrees = angleInRadians * 180.0 / CV_PI;
-    
-    return angleInDegrees;
+
+	// Calculate the angle in radians and then convert to degrees
+	double angleInRadians = acos(cosTheta);
+	double angleInDegrees = angleInRadians * 180.0 / CV_PI;
+
+	return angleInDegrees;
 }
 
 Mat smoothing(Mat originalImage) {
 	Mat smoothedImage;
 	// Median
-	Mat* medianImages = new Mat[NUM_MEDIAN_BLUR_ITERATIONS+1];
+	Mat* medianImages = new Mat[NUM_MEDIAN_BLUR_ITERATIONS + 1];
 	medianImages[0] = originalImage;
 
 	for (int i = 0; i < NUM_MEDIAN_BLUR_ITERATIONS; i++) {
-		medianBlur(medianImages[i], medianImages[i+1], MEDIAN_BLUR_FILTER_SIZE);
+		medianBlur(medianImages[i], medianImages[i + 1], MEDIAN_BLUR_FILTER_SIZE);
 	}
 
 	smoothedImage = medianImages[NUM_MEDIAN_BLUR_ITERATIONS];
@@ -138,11 +139,11 @@ Mat edgeDetection(Mat image) {
 	vector<Mat> outputPlanes;
 	split(processedImage, outputPlanes);
 	split(image, inputPlanes);
-	
+
 	for (int plane = 0; plane < image.channels(); plane++) {
 		Canny(inputPlanes[plane], outputPlanes[plane], CANNY_MIN_THRESHOLD, CANNY_MAX_THRESHOLD);
 	}
-		
+
 	Mat multispectralEdges;
 	merge(outputPlanes, multispectralEdges);
 	return multispectralEdges;
@@ -165,9 +166,8 @@ Mat closing(Mat image) {
 
 void MyApplication() {
 	// 	get the image
-	// char* fileLocation = "../Media/";
-	char* fileLocation = "Media/";
-	// TODO TEMP
+	// TODO change to Media/
+	char* fileLocation = "../Media/";
 	for (int imageIndex = 10; imageIndex <= 29; imageIndex++) {
 		// Get the original image
 		char filename[200];
@@ -177,9 +177,11 @@ void MyApplication() {
 		file.append(filename);
 		Mat originalImage;
 		originalImage = imread(file, -1);
+		imshow("original", originalImage);
+		
 		const Size originalImageSize = originalImage.size();
-		const Point HORIZONTAL_LINE_1 = Point(0.0, originalImageSize.height/2.0);
-		const Point HORIZONTAL_LINE_2 = Point(originalImageSize.width, originalImageSize.height/2.0);
+		const Point HORIZONTAL_LINE_1 = Point(0.0, originalImageSize.height / 2.0);
+		const Point HORIZONTAL_LINE_2 = Point(originalImageSize.width, originalImageSize.height / 2.0);
 		vector<Point> groundTruthPoints = getGroundTruthPoints(imageIndex);
 		Mat groundTruthImage = getGroundTruthImage(imageIndex, originalImage, groundTruthPoints);
 
@@ -233,7 +235,7 @@ void MyApplication() {
 					minBoundingRectangle[i] = minAreaRect(contours[i]);
 					int minBoundRectArea = minBoundingRectangle[i].size.width * minBoundingRectangle[i].size.height;
 					float rectangularity = ((float)convexHullArea / (float)minBoundRectArea);
-					
+
 					// filter by rectangularity
 					if (rectangularity >= RECTANGULARITY_THRESHOLD) {
 						// Draw the convex hull on 2 different images
@@ -274,7 +276,7 @@ void MyApplication() {
 		int whiteRegionsLength = whiteRegions.size();
 		int prevX = -1.0;
 		int prevY = -1.0;
-		
+
 		// get center point of each hull
 		for (int i = 0; i < whiteRegionsLength; i++) {
 			Moments m = moments(convexHullsUnfiltered[whiteRegions[i]]);
@@ -338,17 +340,17 @@ void MyApplication() {
 		float minAngleSum = 181.0;
 		vector<int> maxPotentialCrossings(0);
 		for (int i = 0; i < closeConvexHullsLength - 2; i++) {
-			for (int j = i+1; j < closeConvexHullsLength - 1; j++) {
+			for (int j = i + 1; j < closeConvexHullsLength - 1; j++) {
 				int count = 2;
 				float angleSum = 0.0;
-				vector<int> potentialCrossings = {closeConvexHulls[i], closeConvexHulls[j]};
+				vector<int> potentialCrossings = { closeConvexHulls[i], closeConvexHulls[j] };
 
-				for (int k = j+1; k < closeConvexHullsLength; k++) {
+				for (int k = j + 1; k < closeConvexHullsLength; k++) {
 					float angle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[j],
-													potentialCrossingsCenters[i], potentialCrossingsCenters[k]);
+						potentialCrossingsCenters[i], potentialCrossingsCenters[k]);
 					// calculate the angle between a horizontal line, and a line going through the centers of the crossing
-					float horizontalAngle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[k], 
-														  HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
+					float horizontalAngle = angleBetweenLines(potentialCrossingsCenters[i], potentialCrossingsCenters[k],
+						HORIZONTAL_LINE_1, HORIZONTAL_LINE_2);
 					if (angle > 90.0) {
 						angle = 180.0 - angle;
 					}
@@ -363,7 +365,7 @@ void MyApplication() {
 						potentialCrossings.push_back(closeConvexHulls[k]);
 					}
 				}
-				
+
 				// if we actually found a linear sequence with length > 2
 				if (count > 2) {
 					if (count > maxCount) {
@@ -374,7 +376,7 @@ void MyApplication() {
 						if (maxCount == closeConvexHullsLength) {
 							i = closeConvexHullsLength;
 							j = closeConvexHullsLength;
-						}	
+						}
 					}
 					// if there's a tie for the longest sequence
 					else if (count == maxCount) {
@@ -416,7 +418,7 @@ void MyApplication() {
 			int maxX = 0;
 			for (int i = 0; i < maxPotentialCrossingLength; i++) {
 				for (Point point : convexHullsUnfiltered[maxPotentialCrossings[i]]) {
-					
+
 					int y = point.y;
 					if (y < minY) {
 						minY = y;
@@ -471,7 +473,7 @@ void MyApplication() {
 		imshow("Output", output8);
 
 		if (foundCrossing) {
-			vector<Point> predictedPoints = {bottomLeft, bottomRight, topLeft, topRight};
+			vector<Point> predictedPoints = { bottomLeft, bottomRight, topLeft, topRight };
 			vector<Point> groundTruthConvexHull, predictedConvexHull;
 			convexHull(groundTruthPoints, groundTruthConvexHull);
 			convexHull(predictedPoints, predictedConvexHull);
