@@ -1,6 +1,7 @@
 #include "Utilities.h"
 #include <list>
 
+#define CUSTOM_TEST_IMAGES true
 #define _CRT_SECURE_NO_WARNINGS
 
 // Ground truth for pedestrian crossings.  Each row contains
@@ -39,9 +40,9 @@ const int CANNY_MIN_THRESHOLD = 150;  // tested for optimal value
 const int CANNY_MAX_THRESHOLD = 255;  // tested for optimal value
 const int CONTOUR_SIZE_THRESHOLD = 90;  // tested for optimal value
 const int MIN_CONTOUR_AREA_THRESHOLD = 50;  // 50 is pretty loose/safe
-const int MAX_CONTOUR_AREA_THRESHOLD = 3000;  // tested for optimal value
+const int MAX_CONTOUR_AREA_THRESHOLD = 5000;  // train: 3000
 const int MIN_HULL_AREA_THRESHOLD = 500;  // train: 400
-const int MAX_HULL_AREA_THRESHOLD = 3500;  // tested for optimal value
+const int MAX_HULL_AREA_THRESHOLD = 5000;  // train: 3500
 const float RECTANGULARITY_THRESHOLD = 0.5;  // train: 0.6
 const float MIN_HULL_DISTANCE_THRESHOLD = 10.0;  // train: 5.0
 const float MAX_HULL_DISTANCE_THRESHOLD = 175.0;  // train: 150
@@ -51,6 +52,7 @@ const float HORIZONTAL_ANGLE_THRESHOLD = 30.0;  // tested for optimal value
 
 vector<Point> getGroundTruthPoints(int imageIndex) {
 	vector<Point> groundTruthPoints;
+#if !CUSTOM_TEST_IMAGES
 	for (int i = 0; i < pedestrianCrossingGroundTruthSize; i++) {
 		if (pedestrianCrossingGroundTruth[i][0] == imageIndex) {
 			// init points
@@ -62,13 +64,13 @@ vector<Point> getGroundTruthPoints(int imageIndex) {
 			i = pedestrianCrossingGroundTruthSize; // end loop
 		}
 	}
-
+#endif
 	return groundTruthPoints;
 }
 
 Mat getGroundTruthImage(int imageIndex, Mat originalImage, vector<Point> groundTruthPoints) {
 	Mat groundTruthImage = originalImage.clone();
-
+#if !CUSTOM_TEST_IMAGES
 	for (int i = 0; i < pedestrianCrossingGroundTruthSize; i++) {
 		if (pedestrianCrossingGroundTruth[i][0] == imageIndex) {
 
@@ -81,7 +83,7 @@ Mat getGroundTruthImage(int imageIndex, Mat originalImage, vector<Point> groundT
 			i = pedestrianCrossingGroundTruthSize; // end loop
 		}
 	}
-
+#endif
 	return groundTruthImage;
 }
 
@@ -168,11 +170,18 @@ void MyApplication() {
 	// 	get the image
 	// TODO change to Media/
 	char* fileLocation = "../Media/";
+#if !CUSTOM_TEST_IMAGES
 	for (int imageIndex = 10; imageIndex <= 29; imageIndex++) {
+#else
+	for (int imageIndex = 1; imageIndex <= 9; imageIndex++) {
+#endif
 		// Get the original image
 		char filename[200];
+#if !CUSTOM_TEST_IMAGES
 		sprintf(filename, "PC%d.jpg", imageIndex);
-
+#else
+		sprintf(filename, "test-%d.jpg", imageIndex);
+#endif
 		string file(fileLocation);
 		file.append(filename);
 		Mat originalImage;
@@ -466,12 +475,12 @@ void MyApplication() {
 			line(combined_image, topRight, bottomRight, BLUE, 2);
 		}
 
-		// Mat output7 = JoinImagesHorizontally(pedestrianCrossingImage, "Longest Linear Sequence", groundTruthImage, "Ground Truth");
-		Mat output7 = JoinImagesHorizontally(contoursImage, "Longest Linear Sequence", groundTruthImage, "Ground Truth");
+		Mat output7 = JoinImagesHorizontally(pedestrianCrossingImage, "Longest Linear Sequence", groundTruthImage, "Ground Truth");
 		Mat output8 = JoinImagesHorizontally(predictedImage, "Predicted", combined_image, "Combined");
 		Mat outputImage = JoinImagesVertically(output7, "", output8, "");
 		imshow("Output", outputImage);
 
+#if !CUSTOM_TEST_IMAGES
 		if (foundCrossing) {
 			vector<Point> predictedPoints = { bottomLeft, bottomRight, topLeft, topRight };
 			vector<Point> groundTruthConvexHull, predictedConvexHull;
@@ -487,7 +496,7 @@ void MyApplication() {
 			iou = ceil(iou * 100.0);
 			cout << imageIndex << ": IoU = " << iou << "%\n";
 		}
-
+#endif
 		// go to next image
 		waitKey();
 		destroyAllWindows();
