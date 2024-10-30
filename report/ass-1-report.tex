@@ -15,10 +15,6 @@
 		\end{Large}
 	\end{center}
 	
-	\section*{Introduction}
-	
-	The goal of this assignment is to detect pedestrian crossings in images. It is assumed they are taken from a car's point of view. Firstly, I will describe the theory behind my process, and then present results and analyse both successes and failures.
-	
 	\section{Theory of the Processing}
 	
 	\subsection{Smoothing}
@@ -77,7 +73,7 @@
 	
 	One distinctive trait of pedestrian crossings are it's white-ish colour. For each filtered convex hull, the mean colour of the convex hull is calculated. This RGB value is compared to the white RGB value by calculating the Euclidean distance between the two 3D vectors. From trial-and-error testing, I found $150.0$ to be a forgiving value, but with good results.
 	
-	\subsection{Filtering out isolated Convex Hulls}
+	\subsection{Filtering out isolated \& overlapping Convex Hulls}
 	
 	Another distinctive trait of pedestrian crossings is that they are positioned relatively close together. In this step of the process I wanted to filter out convex hulls that were isolated and had no neighbours - likely these are not pedestrian crossings because otherwise they would have neighbours.
 	
@@ -106,12 +102,6 @@
 		\item My algorithm will only return one potential pedestrian crossing. If there are multiple pedestrian crossings in the image, it will choose the longer one.
 	\end{itemize}
 	
-	\begin{figure}[H]
-		\centering
-		\includegraphics[scale=0.3]{linear}
-		\caption{Longest Linear Sequence. My algorithm has determined all $5$ convex hulls to be in a relatively straight line to each other.}
-	\end{figure}
-	
 	\subsection{Drawing the Bounding Box}
 	
 	If a pedestrian crossing was identified, the bounding box must be drawn around it to compare with the ground truth.
@@ -120,22 +110,51 @@
 	
 	\begin{figure}[H]
 		\centering
+		\includegraphics[scale=0.3]{linear}
 		\includegraphics[scale=0.3]{box}
-		\caption{Drawing the bounding box.}
+		\caption{Left: Longest Linear Sequence. Right: Drawing the bounding box. My algorithm has determined all $5$ convex hulls to be in a relatively straight line to each other.}
 	\end{figure}
 	
-	\newpage
 	\section{Results and Analysis}
 	
-	\subsection*{Performance Metric}
+	\subsection*{Performance Metrics}
 	
 	Seeing as this is an object detection problem, it made sense to use Intersection over Union (IoU) as my performance metric.
 	
-	\[ IoU = \frac{Predicted \cap Ground Truth}{Predicted \cup Ground Truth} = \frac{IntersectionArea}{GroundTruthArea + PredictedArea - IntersectionArea} \]
+	\[ IoU = \frac{Predicted \cap Ground\; Truth}{Predicted \cup Ground\; Truth} = \frac{Intersection\; Area}{Ground\; Truth\; Area + Predicted\; Area - Intersection\; Area} \]
 	
-	The $IntersectionArea$ was calculated using the \verb|intersectConvexConvex| method. The $GroundTruthArea$ and $PredictedArea$ were calculated using the \verb|contourArea| method.
+	The $Intersection\; Area$ was calculated using the \verb|intersectConvexConvex| method. The $Ground\; Truth\; Area$ and $Predicted\; Area$ were calculated using the \verb|contourArea| method.
 	
-	Following from the advice in the lectures, an IoU value over $50\%$ is considered a good match.
+	Following from the advice in the lectures, an IoU value over $50\%$ is considered a good match.\newline
+	
+	Additionally, the F1 score will be used in measuring my algorithm's performance based on both training and test data. For the sake of simplicity, an observed positive is when the IoU is over $50\%$. I chose to go with this metric as it integrates elements of both Precision and Recall.
+	
+	\[ F1\; Score = \frac{2*TP}{2*TP+FP+FN} \]
+	
+	\subsection{Successes}
+	
+	I will not be including all cases of successes (as many of them are trivial), only examples of significance. The green lines correspond to the Ground Truth, and blue lines correspond to my Prediction.
+	
+	% successes worth talking about:
+	% 16: diagonal + small
+	% 18: sloped + damaged crosswalk
+	% 21: close call (IoU 50%)
+	% 27: varying shapes (triangular one)
+	% 28: road markings (better to do this than 20 as its test)
+	
+	% failures:
+	% 22: not predicted at all
+	
+	
+	\begin{figure}[H]
+		\centering
+		\includegraphics[scale=0.2]{10}
+		\caption{The algorithm performs very well with IoU scores of $87\%$, $73\%$, $90\%$, $88\%$, $88\%$, $86\%$, $78\%$, $89\%$ respectively.}
+	\end{figure}
+	
+	\subsection{Failures}
+	
+	\subsection{Robustness}
 	
 	%\section*{Conclusion}
 \end{document}
