@@ -168,8 +168,7 @@ Mat closing(Mat image) {
 
 void MyApplication() {
 	// 	get the image
-	// TODO change to Media/
-	char* fileLocation = "../Media/";
+	char* fileLocation = "Media/";
 #if !CUSTOM_TEST_IMAGES
 	for (int imageIndex = 10; imageIndex <= 29; imageIndex++) {
 #else
