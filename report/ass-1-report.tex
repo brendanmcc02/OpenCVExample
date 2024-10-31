@@ -4,6 +4,7 @@
 \usepackage[T1]{fontenc}
 \usepackage{float}  % used for image positioning, very handy.
 \usepackage{gensymb} % has the degree symbol
+\usepackage{amssymb}
 
 \begin{document}
 	
@@ -28,14 +29,21 @@
 	I chose to go with \textbf{Canny Edge Detection} as opposed to Boundary Chain Codes, because with Canny I could have more customisation over the results by changing the parameters, whereas with Boundary Chain Codes it was more limiting.
 	
 	\begin{figure}[H]
-		\centering
-		\includegraphics[scale=0.3]{smoothing-edge-detection}
-		\caption{Median Smoothing \& Canny Edge Detection. I experimented with multiple iterations of median smoothing, however I found the best results with just one iteration. Additionally, I opted for a filter size of 3x3 as I wanted the edges to be as sharp as possible. With larger filter sizes, I was worried it would corrupt the image too much and deviate too far from the original. For the edge detection, the low and high thresholds were chosen mostly based on trial-and-error. I ensured that my low threshold value was conservative, as this is indicative of the number of contours detected by Canny, and I wanted to be sure that my edge detection would not miss out on any potential pedestrian crossings.}
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.3]{smoothing}
+			\caption{Median Smoothing. I experimented with multiple iterations of median smoothing, however I found the best results with just one iteration. Additionally, I opted for a filter size of 3x3 as I wanted the edges to be as sharp as possible. With larger filter sizes, I was worried it would corrupt the image too much and deviate too far from the original.}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.3]{edge-detection}
+			\caption{Canny Edge Detection. The low and high thresholds were chosen mostly based on trial-and-error. I ensured that my low threshold value was conservative, as this is indicative of the number of contours detected by Canny, and I wanted to be sure that my edge detection would not miss out on any potential pedestrian crossings.}
+		\end{minipage}
 	\end{figure}
 	
 	\subsection{Binary Thresholding}
 	
-	The output of the previous step in the process was an RGB multispectral image, and I wanted a binary image to simplify things further. I used \textbf{Otsu Thresholding} to convert to binary, followed by a closing operation.
+	The output of the previous step in the process was an RGB multispectral image, and I wanted a binary image to simplify things further. I used \textbf{Otsu Thresholding} to convert to binary, followed by a closing operation. See figure \ref{otsu-cca} for results.
 	
 	\subsection{Connected Components Analysis and Shape Analysis}\label{cca}
 	
@@ -43,7 +51,7 @@
 	
 	After finding all the closed contours in the image, they would then go through the following filtering process:
 	
-	\emph{All parameters were chosen through trial-and-error testings.}
+	\emph{Note: All parameters were chosen through trial-and-error testings.}
 	
 	\begin{enumerate}
 		\item Filter by Contour perimeter and area
@@ -67,11 +75,12 @@
 		\centering
 		\includegraphics[scale=0.3]{thresholding-cca}
 		\caption{Left-to-Right: Otsu Thresholding, Closing, CCA \& Shape Analysis. The closing operation was done to fill any potential gaps in the edges of pedestrian crossings. This would yield better results for CCA. From some trial-and-error testing, I found a closing kernel size of 2 to be optimal for my process.}
+		\label{otsu-cca}
 	\end{figure}
 
 	\subsection{Colour Comparison}\label{colour-distance}
 	
-	One distinctive trait of pedestrian crossings are it's white-ish colour. For each filtered convex hull, the mean colour of the convex hull is calculated. This RGB value is compared to the white RGB value by calculating the Euclidean distance between the two 3D vectors. From trial-and-error testing, I found $150.0$ to be a forgiving value, but with good results.
+	One distinctive trait of pedestrian crossings are it's white-ish colour. For each filtered convex hull, the mean colour of the convex hull is calculated. This RGB value is compared to the white RGB value by calculating the Euclidean distance between the two 3D vectors. From trial-and-error testing, I found $150.0$ to be a forgiving value with good results.
 	
 	\subsection{Filtering out isolated \& overlapping Convex Hulls}
 	
@@ -84,7 +93,7 @@
 	\begin{figure}[H]
 		\centering
 		\includegraphics[scale=0.3]{white-isolated}
-		\caption{Left-to-right: Convex Hulls, White Regions, Filtering out isolated convex hulls. We can see the centre image has filtered out the van region in the top-right of the image because my process has deemed it is not white enough in colour to be determined as a pedestrian crossing. In the right image we can observe the leaves in the bottom right corner have been filtered out as they have no nearby neighbours. If you look closely at the pedestrian crossings, we can observe that overlapping edges have also been filtered out.}
+		\caption{Left-to-right: Convex Hulls, White Regions, Filtering out isolated convex hulls. We can see the centre image has filtered out the van region in the top-right of the image because my the enclosed contour is not white enough. In the right image we can observe the leaves in the bottom right corner have been filtered out as they have no nearby neighbours. If you look closely at the pedestrian crossings, we can observe that overlapping edges have also been filtered out.}
 	\end{figure}
 	
 	\subsection{Finding the longest linear sequence}\label{longest-linear-sequence}
@@ -103,15 +112,21 @@
 	
 	\subsection{Drawing the Bounding Box}\label{bounding-box}
 	
-	If a pedestrian crossing was identified, the bounding box must be drawn around it to compare with the ground truth.
+	If a pedestrian crossing was identified, a bounding box was drawn around it.
 	
 	Various straight lines were drawn through the centres of the pedestrian crossings and the mean slope was calculated. The top edge of the bounding box would be drawn through the maximum y-coordinate with this mean slope, and the bottom edge of the bounding box would be drawn through the minimum y-coordinate with this mean slope.
 	
 	\begin{figure}[H]
-		\centering
-		\includegraphics[scale=0.3]{linear}
-		\includegraphics[scale=0.3]{box}
-		\caption{Left: Longest Linear Sequence. Right: Drawing the bounding box. My algorithm has determined all $5$ convex hulls to be in a relatively straight line to each other.}
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.3]{linear}
+			\caption{Longest Linear Sequence.}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.3]{box}
+			\caption{Drawing the bounding box.}
+		\end{minipage}
 	\end{figure}
 	
 	\section{Results and Analysis}
@@ -139,12 +154,12 @@
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\includegraphics[scale=0.2]{16-alt}
-			\caption{We can observe that even if all individual crossings are not captured, the bounding box gets extended to capture the entire crossing, demonstrating the robustness of the solution. This has it's limitations however, and will be discussed in another section. IoU=78\%.}
+			\caption{We can observe that even if all individual crossings are not captured, the bounding box gets extended to capture the entire crossing, demonstrating the robustness of the solution. The limitations of this will be discussed in figure \ref{outlier-image}. IoU=78\%.}
 		\end{minipage}\hfill
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\includegraphics[scale=0.2]{18-alt}
-			\caption{Despite some worn-down crossings, all are identified. The colour distance threshold had to be tweaked to a forgiving value ($150$) to consider edge cases such as the above. This also has it's limitations and will be discussed in another section. IoU=84\%.}
+			\caption{Despite some worn-down crossings, all are identified. The colour distance threshold had to be tweaked to a forgiving value ($150$) to consider edge cases such as the above. This also has it's limitations and will be discussed in section \ref{colour-distance-limitation}. IoU=84\%.}
 		\end{minipage}
 	\end{figure}
 	
@@ -152,7 +167,7 @@
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\includegraphics[scale=0.2]{14-alt}
-			\caption{We can observe that the solution still identifies crossings far away at a small size. The minimum area threshold had to be tweaked to allow for this. I was unsure if I was over-fitting here, but my solution still worked well for the unseen test images. IoU=88\%.}
+			\caption{We can observe that the solution still identifies crossings far away at a small size. The minimum area threshold had to be tweaked carefully to allow for this. IoU=88\%.}
 		\end{minipage}\hfill
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
@@ -169,18 +184,19 @@
 	A key feature of pedestrian crossings is that they are relatively evenly spaced. I was considering integrating this into my solution by examining the relative distance between each of the identified crossings, but I decided against it for two main reasons: 
 	\begin{enumerate}
 		\item The distance between the crossings would vary drastically due to perspective warping. This would be a very challenging obstacle to overcome.
-		\item If one of the crossings in the middle would fail to be identified - for example, it could be covered in leaves - it would collapse my solution and fail to recongise the entire crossing.
+		\item If one of the crossings in the middle would fail to be identified - for example, it could be covered in leaves - it would collapse my solution and fail to recongise the entire crossing. See figure \ref{missing-middle} for a good visual example.
 	\end{enumerate}
 	
 	\subsubsection{Outlier Resilience}
 	
-	As mentioned in section \ref{longest-linear-sequence} \& \ref{bounding-box}, when checking for collinearity between the crossings, I allow for 8\textdegree $\;$deviation. Furthermore, the gradient of the bounding box is the mean slope between all the centroids of the identified crossings. This means that even when there is an outlier crossing, it will not significantly hurt the output of the solution. This is best demonstrated in Figure \ref{outlier-image} below.
+	As mentioned in section \ref{longest-linear-sequence} \& \ref{bounding-box}, when checking for collinearity between the crossings, I allow for 8\textdegree $\;$deviation. Furthermore, the gradient of the bounding box is the mean slope between all the centroids of the identified crossings. This means that even when there is an outlier crossing, it will not significantly hurt the output of the solution. This is best demonstrated in Figure \ref{outlier-image}.
 	
 	\begin{figure}[H]
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\includegraphics[scale=0.2]{24-alt}
 			\caption{Despite the solution failing to identify the crossing in the middle, it still recognises the other ones and since they remain in a linear sequence, it correctly identifies it as a pedestrian crossing. IoU=72\%.}
+			\label{missing-middle}
 		\end{minipage}\hfill
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
@@ -209,21 +225,27 @@
 		\end{minipage}
 	\end{figure}
 	
-	\subsection{Potential Limitations}
+	\subsection{Limitations \& Potential Solutions}
 	
-	I would argue that the unseen image test set was very generous - the photos were mostly of the same pedestrian crossings at different distances. While developing my solution, I was conscious of my solution's limitations. In this section, I will discuss those in detail, and their potential solutions.
+	In this section, I will discuss my solution's limitations and their potential solutions.
 	
 	\subsubsection{Shape Analysis}
 	
-	In section \ref{cca} I mention that my threshold value for rectangularity was 0.5. Intuitively, this sounds like a very loose value. However, as I tested my solution on the training images, the results were very poor for high values of rectangularity, so I lowered the value. See figure \ref{shape-analysis-img}.
+	In section \ref{cca}, I mention that my threshold value for rectangularity was 0.5. Intuitively, this sounds like a very loose value. However, as I tested my solution on the training images, the results were very poor for high values of rectangularity, so I lowered the value. See figure \ref{shape-analysis-img}.
 	
 	As a potential solution to this, I could have performed a perspective transformation on the individual crossing, and then perform the rectangularity analysis. This would result in more realistic and accurate shape analysis.
 	
-	\subsubsection{Colour Distance}
+	\subsubsection{Colour Distance}\label{colour-distance-limitation}
 	
-	In section \ref{colour-distance} my method for comparing enclosed contours with white is described. Despite my best efforts for calculating the most optimal colour distance value, the results were shaky at times. See figure \ref{bus-lane} for an example. Furthermore, I doubt my colour distance method would work well in darker lighting conditions.
+	In section \ref{colour-distance}, my method for comparing enclosed contours with the white colour is described. Despite my best efforts for calculating the most optimal colour distance value, the results were shaky at times. See figure \ref{bus-lane} for an example. Furthermore, I doubt my colour distance method would work well in darker lighting conditions.
 	
 	This could potentially be improved by obtaining a dataset of varying pedestrian crossings and performing histogram back projection to obtain a probability image. We can threshold for values above 0.8 for example and use these as our white regions.
+	
+	\subsubsection{Reliance on 'Magic Numbers'}
+	
+	My solution features 13 constants that were fine-tuned by hand. I tried my best to make the values loose and forgiving, but the reality is that my reference was only the 10 training images. As a result, it is likely that my parameters were over-fitting to the training set. Normally an indication of over-fitting is poor performance on unseen test data. In my case, my solution worked very well on the unseen images. 
+	
+	However, I would argue that the unseen image test set was very generous - the photos were mostly of the same pedestrian crossings at different distances. I doubt it's performance would be as good on another diverse image set.
 	
 	\begin{figure}[H]
 		\begin{minipage}[c]{0.45\linewidth}
@@ -235,10 +257,59 @@
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\includegraphics[scale=0.2]{29-alt}
-			\caption{The triangular pedestrian crossing luckily gets identified. However, I would rather this wasn't the case - from an intuitive point-of-view, this is not a rectangular shape, so it should not really be identified as a crossing.}
+			\caption{My solution still recognises two letters as potential pedestrian crossings. Recall a heuristic I implemented was that for something to be recognised as a pedestrian crossing, $>= 3$ individual pedestrian crossings must be identified.}
 			\label{bus-lane}
 		\end{minipage}
 	\end{figure}
 	
-	% heavy reliance on 'magic numbers' and thresholds, could be a case of overfitting
+	\subsection{Overall Results}
+	
+	\begin{center}
+		\begin{tabular}{| c | c | c | c | c | c |}
+			\hline
+			\textbf{Image} & \textbf{IoU} & \textbf{TP} & \textbf{FP} & \textbf{FN} & \textbf{TN} \\
+			\hline
+			PC10 & 87\% & \checkmark & & & \\
+			\hline
+			PC11 & 73\% & \checkmark & & & \\
+			\hline
+			PC12 & 90\% & \checkmark & & & \\
+			\hline
+			PC13 & 88\% & \checkmark & & & \\
+			\hline
+			PC14 & 88\% & \checkmark & & & \\
+			\hline
+			PC15 & 86\% & \checkmark & & & \\
+			\hline
+			PC16 & 78\% & \checkmark & & & \\
+			\hline
+			PC17 & 89\% & \checkmark & & & \\
+			\hline
+			PC18 & 84\% & \checkmark & & & \\
+			\hline
+			PC19 & N/A & & & & \checkmark \\
+			\hline
+			PC20 & 77\% & \checkmark & & & \\
+			\hline
+			PC21 & 93\% & \checkmark & & & \\
+			\hline
+			PC22 & 85\% & \checkmark & & & \\
+			\hline
+			PC23 & 94\% & \checkmark & & & \\
+			\hline
+			PC24 & 72\% & \checkmark & & & \\
+			\hline
+			PC25 & 75\% & \checkmark & & & \\
+			\hline
+			PC26 & 87\% & \checkmark & & & \\
+			\hline
+			PC27 & 87\% & \checkmark & & & \\
+			\hline
+			PC28 & N/A & & & & \checkmark \\
+			\hline
+			PC29 & N/A & & & & \checkmark \\
+			\hline
+		\end{tabular}
+	\end{center}
+	
 \end{document}
