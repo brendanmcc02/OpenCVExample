@@ -37,11 +37,11 @@
 	
 	The output of the previous step in the process was an RGB multispectral image, and I wanted a binary image to simplify things further. I used \textbf{Otsu Thresholding} to convert to binary, followed by a closing operation.
 	
-	\subsection{Connected Components Analysis and Shape Analysis}
+	\subsection{Connected Components Analysis and Shape Analysis}\label{cca}
 	
 	My next goal was to find contours in the binary image. I used CCA for its simplicity, and also because it showed great results on my initial testing.
 	
-	After finding all the contours in the image, they would then go through the following filtering process:
+	After finding all the closed contours in the image, they would then go through the following filtering process:
 	
 	\emph{All parameters were chosen through trial-and-error testings.}
 	
@@ -69,7 +69,7 @@
 		\caption{Left-to-Right: Otsu Thresholding, Closing, CCA \& Shape Analysis. The closing operation was done to fill any potential gaps in the edges of pedestrian crossings. This would yield better results for CCA. From some trial-and-error testing, I found a closing kernel size of 2 to be optimal for my process.}
 	\end{figure}
 
-	\subsection{Colour Comparison}
+	\subsection{Colour Comparison}\label{colour-distance}
 	
 	One distinctive trait of pedestrian crossings are it's white-ish colour. For each filtered convex hull, the mean colour of the convex hull is calculated. This RGB value is compared to the white RGB value by calculating the Euclidean distance between the two 3D vectors. From trial-and-error testing, I found $150.0$ to be a forgiving value, but with good results.
 	
@@ -169,7 +169,7 @@
 	A key feature of pedestrian crossings is that they are relatively evenly spaced. I was considering integrating this into my solution by examining the relative distance between each of the identified crossings, but I decided against it for two main reasons: 
 	\begin{enumerate}
 		\item The distance between the crossings would vary drastically due to perspective warping. This would be a very challenging obstacle to overcome.
-		\item If one of the crossings in the middle would fail to be identified - for example, it could be covered in leaves - it would collapse my solution and fail to recongise a crossing.
+		\item If one of the crossings in the middle would fail to be identified - for example, it could be covered in leaves - it would collapse my solution and fail to recongise the entire crossing.
 	\end{enumerate}
 	
 	\subsubsection{Outlier Resilience}
@@ -185,16 +185,16 @@
 		\begin{minipage}[c]{0.45\linewidth}
 			\centering
 			\includegraphics[scale=0.2]{20-alt}
-			\caption{Since the crossing on the right side is cut off, the centroid of that crossing is perceived incorrectly and the predicted bounding box is skewed. Despite this, my solution still works well in identifying the location of the crossing with an IoU of 77\%. While it's not perfect, it still performs well above 50\%.}
+			\caption{Since the crossing on the right side is cut off, the centroid of that crossing skews the predicted bounding box. Despite this, my solution still works well in identifying the location of the crossing with an IoU of 77\%. While it's not perfect, it still performs well above 50\%.}
 			\label{outlier-image}
 		\end{minipage}
 	\end{figure}
 	
-	\subsection{Non-Pedestrian Crossing Images}
+	\subsubsection{Non-Pedestrian Crossing Images}
 	
 	I also wanted to consider cases where the images do not feature pedestrian crossings. Road markings were an obvious edge case - the key feature about those is that they run relatively vertical to the perspective of the camera, whereas pedestrian crossings run relatively horizontal to the camera.
 	
-	To counter this, I integrated a feature that compares the angle of the identified pedestrian crossing to a horizontal line - if it lies under 30\textdegree , then it is considered a pedestrian crossing. Otherwise, it is likely a road marking.
+	To counter this, I integrated a feature that compares the angle of the identified pedestrian crossing to a horizontal line - if it lies under 30\textdegree , then it is considered a pedestrian crossing. Otherwise, it is likely a road marking. This value was obtained from various trial-and-error testing.
 	
 	\begin{figure}[H]
 		\begin{minipage}[c]{0.45\linewidth}
@@ -211,12 +211,34 @@
 	
 	\subsection{Potential Limitations}
 	
-	\includegraphics[scale=0.2]{27-alt}
-	% talk about rectangularity and how its low, in future could do a perspective transformation and then calculate rectangularity that way, would mean I could have a stricter threshold that would result in less edge cases. 27 is a good example of triangle registering as crosswalk
+	I would argue that the unseen image test set was very generous - the photos were mostly of the same pedestrian crossings at different distances. While developing my solution, I was conscious of my solution's limitations. In this section, I will discuss those in detail, and their potential solutions.
 	
-	% color distance - bus lane for example
+	\subsubsection{Shape Analysis}
+	
+	In section \ref{cca} I mention that my threshold value for rectangularity was 0.5. Intuitively, this sounds like a very loose value. However, as I tested my solution on the training images, the results were very poor for high values of rectangularity, so I lowered the value. See figure \ref{shape-analysis-img}.
+	
+	As a potential solution to this, I could have performed a perspective transformation on the individual crossing, and then perform the rectangularity analysis. This would result in more realistic and accurate shape analysis.
+	
+	\subsubsection{Colour Distance}
+	
+	In section \ref{colour-distance} my method for comparing enclosed contours with white is described. Despite my best efforts for calculating the most optimal colour distance value, the results were shaky at times. See figure \ref{bus-lane} for an example. Furthermore, I doubt my colour distance method would work well in darker lighting conditions.
+	
+	This could potentially be improved by obtaining a dataset of varying pedestrian crossings and performing histogram back projection to obtain a probability image. We can threshold for values above 0.8 for example and use these as our white regions.
+	
+	\begin{figure}[H]
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{27-alt}
+			\caption{The triangular pedestrian crossing luckily gets identified. However, I would rather this wasn't the case - from an intuitive point-of-view, this is not a rectangular shape, so it should not really be identified as a crossing.}
+			\label{shape-analysis-img}
+		\end{minipage}\hfill
+		\begin{minipage}[c]{0.45\linewidth}
+			\centering
+			\includegraphics[scale=0.2]{29-alt}
+			\caption{The triangular pedestrian crossing luckily gets identified. However, I would rather this wasn't the case - from an intuitive point-of-view, this is not a rectangular shape, so it should not really be identified as a crossing.}
+			\label{bus-lane}
+		\end{minipage}
+	\end{figure}
 	
 	% heavy reliance on 'magic numbers' and thresholds, could be a case of overfitting
-	
-	% could talk about night and include night test image
 \end{document}
